@@ -75,25 +75,10 @@
             }
         }
 
-        #canvas, #eggCanvas {
-            display: block;
+        #canvas {
+            display: none;
             border: 2px solid white;
-            margin: 20px auto;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
-        }
-
-        .game-section {
-            margin: 40px 0;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.08);
-            border-radius: 15px;
-        }
-
-        .game-title {
-            font-size: 2rem;
-            margin-bottom: 15px;
-            color: #fbbf24;
+            margin-top: 20px;
         }
 
         .countdown {
@@ -150,9 +135,9 @@
 <body>
     <div class="container">
         <div class="emoji">🎮</div>
-        <h1>Играй в змейку!</h1>
+        <h1>Скоро здесь что-то будет!</h1>
         <p>Добро пожаловать в Маф-клуб Demo</p>
-        <p>🐍 Управление: стрелки на клавиатуре</p>
+        <p>✨ Завтра здесь появится новая программа</p>
 
         <div class="countdown">
             <div class="countdown-title">⏰ До запуска осталось:</div>
@@ -175,21 +160,11 @@
         <div class="info">
             <p>Live Coding Session</p>
             <p>Завтра в 16:00 по Москве 🚀</p>
-            <p style="font-size: 1.2rem; margin-top: 20px; opacity: 0.9;">версия 1.0.6</p>
+            <p style="font-size: 1.2rem; margin-top: 20px; opacity: 0.9;">версия 1.0.3</p>
         </div>
 
-        <!-- Игра Змейка -->
-        <div class="game-section">
-            <div class="game-title">🐍 Змейка</div>
-            <canvas id="canvas" width="400" height="400"></canvas>
-        </div>
-
-        <!-- Игра Волк ловит яйца -->
-        <div class="game-section">
-            <div class="game-title">🥚 Волк ловит яйца</div>
-            <p style="font-size: 1rem; margin-bottom: 10px;">Управление: A (левый верх), Z (левый низ), H (правый верх), B (правый низ)</p>
-            <canvas id="eggCanvas" width="500" height="400"></canvas>
-        </div>
+        <!-- Canvas для змейки (завтра) -->
+        <canvas id="canvas" width="400" height="400"></canvas>
     </div>
 
     <script>
@@ -222,281 +197,8 @@
         updateCountdown();
         setInterval(updateCountdown, 1000);
 
-        console.log('🎮 Маф-клуб Demo - Змейка готова!');
-
-        // Игра Змейка
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-
-        const gridSize = 20;
-        const tileCount = canvas.width / gridSize;
-
-        let snake = [
-            {x: 10, y: 10}
-        ];
-        let velocityX = 0;
-        let velocityY = 0;
-        let food = {
-            x: Math.floor(Math.random() * tileCount),
-            y: Math.floor(Math.random() * tileCount)
-        };
-        let score = 0;
-        let gameRunning = true;
-
-        // Управление
-        document.addEventListener('keydown', (e) => {
-            switch(e.key) {
-                case 'ArrowUp':
-                    if (velocityY === 0) {
-                        velocityX = 0;
-                        velocityY = -1;
-                    }
-                    e.preventDefault();
-                    break;
-                case 'ArrowDown':
-                    if (velocityY === 0) {
-                        velocityX = 0;
-                        velocityY = 1;
-                    }
-                    e.preventDefault();
-                    break;
-                case 'ArrowLeft':
-                    if (velocityX === 0) {
-                        velocityX = -1;
-                        velocityY = 0;
-                    }
-                    e.preventDefault();
-                    break;
-                case 'ArrowRight':
-                    if (velocityX === 0) {
-                        velocityX = 1;
-                        velocityY = 0;
-                    }
-                    e.preventDefault();
-                    break;
-            }
-        });
-
-        function gameLoop() {
-            if (!gameRunning) return;
-
-            // Движение змейки
-            const head = {
-                x: snake[0].x + velocityX,
-                y: snake[0].y + velocityY
-            };
-
-            // Проверка столкновений со стенами
-            if (head.x < 0 || head.x >= tileCount || head.y < 0 || head.y >= tileCount) {
-                resetGame();
-                return;
-            }
-
-            // Проверка столкновения с собой
-            for (let segment of snake) {
-                if (head.x === segment.x && head.y === segment.y) {
-                    resetGame();
-                    return;
-                }
-            }
-
-            snake.unshift(head);
-
-            // Проверка съедания еды
-            if (head.x === food.x && head.y === food.y) {
-                score++;
-                food = {
-                    x: Math.floor(Math.random() * tileCount),
-                    y: Math.floor(Math.random() * tileCount)
-                };
-            } else {
-                snake.pop();
-            }
-
-            // Отрисовка
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // Змейка
-            ctx.fillStyle = '#4ade80';
-            for (let segment of snake) {
-                ctx.fillRect(segment.x * gridSize, segment.y * gridSize, gridSize - 2, gridSize - 2);
-            }
-
-            // Еда
-            ctx.fillStyle = '#f87171';
-            ctx.fillRect(food.x * gridSize, food.y * gridSize, gridSize - 2, gridSize - 2);
-
-            // Счёт
-            ctx.fillStyle = 'white';
-            ctx.font = '20px Arial';
-            ctx.fillText('Счёт: ' + score, 10, 25);
-        }
-
-        function resetGame() {
-            snake = [{x: 10, y: 10}];
-            velocityX = 0;
-            velocityY = 0;
-            score = 0;
-            food = {
-                x: Math.floor(Math.random() * tileCount),
-                y: Math.floor(Math.random() * tileCount)
-            };
-        }
-
-        // Запуск игры
-        setInterval(gameLoop, 100);
-
-        // ==========================================
-        // Игра "Волк ловит яйца"
-        // ==========================================
-        const eggCanvas = document.getElementById('eggCanvas');
-        const eggCtx = eggCanvas.getContext('2d');
-
-        let wolfPosition = 3; // 1=левый верх, 2=левый низ, 3=правый низ, 4=правый верх
-        let eggs = [];
-        let eggScore = 0;
-        let missedEggs = 0;
-        let eggSpeed = 2;
-
-        // Позиции для курочек и волка
-        const positions = {
-            1: { chicken: { x: 50, y: 50 }, basket: { x: 100, y: 120 } },
-            2: { chicken: { x: 50, y: 250 }, basket: { x: 100, y: 320 } },
-            3: { chicken: { x: 450, y: 250 }, basket: { x: 400, y: 320 } },
-            4: { chicken: { x: 450, y: 50 }, basket: { x: 400, y: 120 } }
-        };
-
-        // Управление волком
-        document.addEventListener('keydown', (e) => {
-            const key = e.key.toLowerCase();
-            switch(key) {
-                case 'a':
-                    wolfPosition = 1; // левая верхняя
-                    e.preventDefault();
-                    break;
-                case 'z':
-                    wolfPosition = 2; // левая нижняя
-                    e.preventDefault();
-                    break;
-                case 'b':
-                    wolfPosition = 3; // правая нижняя
-                    e.preventDefault();
-                    break;
-                case 'h':
-                    wolfPosition = 4; // правая верхняя
-                    e.preventDefault();
-                    break;
-            }
-        });
-
-        // Создание нового яйца
-        function createEgg() {
-            const pos = Math.floor(Math.random() * 4) + 1;
-            const startPos = positions[pos].chicken;
-            const endPos = positions[pos].basket;
-
-            // Вычисляем направление движения для диагонали
-            const dx = (endPos.x - startPos.x) / 50; // скорость по X
-            const dy = (endPos.y - startPos.y) / 50; // скорость по Y
-
-            eggs.push({
-                position: pos,
-                x: startPos.x + 20,
-                y: startPos.y + 30,
-                dx: dx,
-                dy: dy,
-                targetY: endPos.y,
-                caught: false
-            });
-        }
-
-        // Игровой цикл для яиц
-        function eggGameLoop() {
-            // Очистка canvas
-            eggCtx.fillStyle = 'rgba(135, 206, 235, 0.3)';
-            eggCtx.fillRect(0, 0, eggCanvas.width, eggCanvas.height);
-
-            // Рисуем курочек
-            eggCtx.font = '30px Arial';
-            for (let pos in positions) {
-                const p = positions[pos];
-                eggCtx.fillText('🐔', p.chicken.x, p.chicken.y);
-            }
-
-            // Рисуем волка в текущей позиции
-            const wolfPos = positions[wolfPosition].basket;
-            eggCtx.font = '40px Arial';
-            eggCtx.fillText('🐺', wolfPos.x - 20, wolfPos.y + 10);
-
-            // Рисуем корзину
-            eggCtx.font = '25px Arial';
-            eggCtx.fillText('🧺', wolfPos.x, wolfPos.y);
-
-            // Обновляем и рисуем яйца
-            for (let i = eggs.length - 1; i >= 0; i--) {
-                const egg = eggs[i];
-
-                if (!egg.caught) {
-                    // Движение яйца по диагонали
-                    egg.x += egg.dx * eggSpeed;
-                    egg.y += egg.dy * eggSpeed;
-
-                    // Проверка, дошло ли яйцо до корзины
-                    if (egg.y >= egg.targetY) {
-                        if (wolfPosition === egg.position) {
-                            // Поймали!
-                            eggScore++;
-                            egg.caught = true;
-                            eggs.splice(i, 1);
-                        } else {
-                            // Пропустили
-                            missedEggs++;
-                            eggs.splice(i, 1);
-                        }
-                    } else {
-                        // Рисуем яйцо
-                        eggCtx.font = '20px Arial';
-                        eggCtx.fillText('🥚', egg.x, egg.y);
-                    }
-                }
-            }
-
-            // Информация
-            eggCtx.fillStyle = 'white';
-            eggCtx.font = 'bold 20px Arial';
-            eggCtx.fillText('Поймано: ' + eggScore, 10, 30);
-            eggCtx.fillText('Пропущено: ' + missedEggs, 10, 60);
-
-            // Увеличение сложности
-            if (eggScore > 0 && eggScore % 10 === 0 && eggSpeed < 4) {
-                eggSpeed += 0.2;
-            }
-
-            // Проигрыш
-            if (missedEggs >= 3) {
-                eggCtx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-                eggCtx.fillRect(0, 0, eggCanvas.width, eggCanvas.height);
-                eggCtx.fillStyle = 'white';
-                eggCtx.font = 'bold 30px Arial';
-                eggCtx.fillText('Игра окончена!', 150, 180);
-                eggCtx.fillText('Счёт: ' + eggScore, 190, 220);
-
-                // Перезапуск через 2 секунды
-                setTimeout(() => {
-                    eggs = [];
-                    eggScore = 0;
-                    missedEggs = 0;
-                    eggSpeed = 2;
-                }, 2000);
-            }
-        }
-
-        // Создаём яйцо каждые 1.5 секунды
-        setInterval(createEgg, 1500);
-
-        // Запуск игрового цикла
-        setInterval(eggGameLoop, 30);
+        console.log('🎮 Готовимся к live coding!');
+        console.log('Завтра в 16:00 здесь появится змейка');
     </script>
 </body>
 </html>
