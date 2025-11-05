@@ -80,17 +80,86 @@
             border: 2px solid white;
             margin-top: 20px;
         }
+
+        .countdown {
+            margin-top: 40px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 15px;
+            animation: pulse 2s infinite;
+        }
+
+        .countdown-title {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            opacity: 0.9;
+        }
+
+        .timer {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .time-unit {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 80px;
+        }
+
+        .time-value {
+            font-size: 3rem;
+            font-weight: bold;
+            line-height: 1;
+            margin-bottom: 5px;
+        }
+
+        .time-label {
+            font-size: 0.9rem;
+            opacity: 0.7;
+            text-transform: uppercase;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+            }
+            50% {
+                box-shadow: 0 0 40px rgba(255, 255, 255, 0.4);
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="emoji">👋</div>
-        <h1>Привет, мир!</h1>
+        <div class="emoji">🎮</div>
+        <h1>Скоро здесь что-то будет!</h1>
         <p>Добро пожаловать в Маф-клуб Demo</p>
-        <p>🎮 Завтра здесь будет змейка</p>
+        <p>✨ Завтра здесь появится новая программа</p>
+
+        <div class="countdown">
+            <div class="countdown-title">⏰ До запуска осталось:</div>
+            <div class="timer" id="timer">
+                <div class="time-unit">
+                    <div class="time-value" id="hours">00</div>
+                    <div class="time-label">Часов</div>
+                </div>
+                <div class="time-unit">
+                    <div class="time-value" id="minutes">00</div>
+                    <div class="time-label">Минут</div>
+                </div>
+                <div class="time-unit">
+                    <div class="time-value" id="seconds">00</div>
+                    <div class="time-label">Секунд</div>
+                </div>
+            </div>
+        </div>
+
         <div class="info">
             <p>Live Coding Session</p>
-            <p>Cloudflare Pages + GitHub</p>
+            <p>Завтра в 16:00 по Москве 🚀</p>
         </div>
 
         <!-- Canvas для змейки (завтра) -->
@@ -98,13 +167,37 @@
     </div>
 
     <script>
-        // Консольное приветствие для разработчиков :)
-        console.log('🎮 Готовимся к live coding!');
-        console.log('Завтра здесь появится змейка');
+        // Таймер обратного отсчёта до 7 ноября 16:00 по московскому времени
+        function updateCountdown() {
+            // Целевое время: 7 ноября 2025, 16:00 по Московскому времени (UTC+3)
+            const targetDate = new Date('2025-11-07T16:00:00+03:00');
+            const now = new Date();
 
-        // Место для кода змейки (завтра добавим)
-        // const canvas = document.getElementById('canvas');
-        // const ctx = canvas.getContext('2d');
+            const diff = targetDate - now;
+
+            if (diff <= 0) {
+                document.getElementById('hours').textContent = '00';
+                document.getElementById('minutes').textContent = '00';
+                document.getElementById('seconds').textContent = '00';
+                document.querySelector('.countdown-title').textContent = '🎉 Запуск прямо сейчас!';
+                return;
+            }
+
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+            document.getElementById('hours').textContent = String(hours).padStart(2, '0');
+            document.getElementById('minutes').textContent = String(minutes).padStart(2, '0');
+            document.getElementById('seconds').textContent = String(seconds).padStart(2, '0');
+        }
+
+        // Обновляем таймер каждую секунду
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
+
+        console.log('🎮 Готовимся к live coding!');
+        console.log('Завтра в 16:00 здесь появится змейка');
     </script>
 </body>
 </html>
