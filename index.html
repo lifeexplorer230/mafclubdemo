@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Маф-клуб - Live Coding Demo</title>
+    <title>Маф-клуб - Игры</title>
     <style>
         * {
             margin: 0;
@@ -13,46 +13,95 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
             min-height: 100vh;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
+            padding: 40px 20px;
         }
 
-        .container {
+        .header {
             text-align: center;
-            padding: 40px;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .games-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .game-card {
             background: rgba(255, 255, 255, 0.1);
             border-radius: 20px;
             backdrop-filter: blur(10px);
             box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            padding: 30px;
+            text-align: center;
+            transition: transform 0.3s ease;
         }
 
-        h1 {
-            font-size: 4rem;
+        .game-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .game-title {
+            font-size: 2rem;
             margin-bottom: 20px;
-            animation: fadeIn 1s ease-in;
         }
 
-        p {
+        .game-canvas {
+            border: 3px solid white;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .game-controls {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .game-score {
             font-size: 1.5rem;
+            font-weight: bold;
             margin-bottom: 10px;
-            opacity: 0.9;
         }
 
-        .emoji {
-            font-size: 5rem;
-            margin: 20px 0;
-            animation: bounce 2s infinite;
-        }
-
-        .info {
-            margin-top: 30px;
+        .game-button {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid white;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 25px;
             font-size: 1rem;
-            opacity: 0.7;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .game-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        .game-instructions {
+            margin-top: 15px;
+            font-size: 0.9rem;
+            opacity: 0.8;
         }
 
         @keyframes fadeIn {
@@ -66,139 +115,180 @@
             }
         }
 
-        @keyframes bounce {
-            0%, 100% {
-                transform: translateY(0);
-            }
-            50% {
-                transform: translateY(-20px);
-            }
-        }
-
-        #canvas {
-            display: none;
-            border: 2px solid white;
-            margin-top: 20px;
-        }
-
-        .countdown {
-            margin-top: 40px;
-            padding: 30px;
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 15px;
-            animation: pulse 2s infinite;
-        }
-
-        .countdown-title {
-            font-size: 1.3rem;
-            margin-bottom: 20px;
-            opacity: 0.9;
-        }
-
-        .timer {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-
-        .time-unit {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-width: 80px;
-        }
-
-        .time-value {
-            font-size: 3rem;
-            font-weight: bold;
-            line-height: 1;
-            margin-bottom: 5px;
-        }
-
-        .time-label {
-            font-size: 0.9rem;
-            opacity: 0.7;
-            text-transform: uppercase;
-        }
-
-        @keyframes pulse {
-            0%, 100% {
-                box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
-            }
-            50% {
-                box-shadow: 0 0 40px rgba(255, 255, 255, 0.4);
-            }
+        .header {
+            animation: fadeIn 1s ease-in;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="emoji">🎮</div>
-        <h1>Скоро здесь что-то будет!</h1>
-        <p>Добро пожаловать в Маф-клуб Demo</p>
-        <p>✨ Сегодня здесь появится новая программа</p>
+    <div class="header">
+        <h1>🎮 Маф-клуб Игры</h1>
+        <p>Добро пожаловать! Выбери игру и начни играть</p>
+    </div>
 
-        <div class="countdown">
-            <div class="countdown-title">⏰ До запуска осталось:</div>
-            <div class="timer" id="timer">
-                <div class="time-unit">
-                    <div class="time-value" id="hours">00</div>
-                    <div class="time-label">Часов</div>
-                </div>
-                <div class="time-unit">
-                    <div class="time-value" id="minutes">00</div>
-                    <div class="time-label">Минут</div>
-                </div>
-                <div class="time-unit">
-                    <div class="time-value" id="seconds">00</div>
-                    <div class="time-label">Секунд</div>
+    <div class="games-container">
+        <!-- Игра Змейка -->
+        <div class="game-card">
+            <div class="game-title">🐍 Змейка</div>
+            <canvas id="snakeCanvas" class="game-canvas" width="400" height="400"></canvas>
+            <div class="game-controls">
+                <div class="game-score">Счёт: <span id="snakeScore">0</span></div>
+                <button class="game-button" onclick="startSnakeGame()">Начать игру</button>
+                <div class="game-instructions">
+                    Управление: ↑ ↓ ← → или W A S D
                 </div>
             </div>
         </div>
 
-        <div class="info">
-            <p>Live Coding Session</p>
-            <p>Сегодня в 16:00 по Москве 🚀</p>
-            <p style="font-size: 1.2rem; margin-top: 20px; opacity: 0.9;">версия 1.04</p>
-        </div>
-
-        <!-- Canvas для змейки (завтра) -->
-        <canvas id="canvas" width="400" height="400"></canvas>
+        <!-- Место для других игр -->
+        <!-- Будущие игры будут добавляться сюда -->
     </div>
 
     <script>
-        // Таймер обратного отсчёта до 6 ноября 16:00 по московскому времени
-        function updateCountdown() {
-            // Целевое время: 6 ноября 2025, 16:00 по Московскому времени (UTC+3)
-            const targetDate = new Date('2025-11-06T16:00:00+03:00');
-            const now = new Date();
+        // ========== ИГРА ЗМЕЙКА ==========
+        const canvas = document.getElementById('snakeCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreElement = document.getElementById('snakeScore');
 
-            const diff = targetDate - now;
+        const gridSize = 20;
+        const tileCount = canvas.width / gridSize;
 
-            if (diff <= 0) {
-                document.getElementById('hours').textContent = '00';
-                document.getElementById('minutes').textContent = '00';
-                document.getElementById('seconds').textContent = '00';
-                document.querySelector('.countdown-title').textContent = '🎉 Запуск прямо сейчас!';
+        let snake = [{ x: 10, y: 10 }];
+        let food = { x: 15, y: 15 };
+        let dx = 0;
+        let dy = 0;
+        let score = 0;
+        let gameLoop = null;
+        let gameStarted = false;
+
+        function startSnakeGame() {
+            if (gameLoop) {
+                clearInterval(gameLoop);
+            }
+
+            // Сброс игры
+            snake = [{ x: 10, y: 10 }];
+            dx = 1;
+            dy = 0;
+            score = 0;
+            scoreElement.textContent = score;
+            gameStarted = true;
+
+            generateFood();
+            gameLoop = setInterval(updateSnakeGame, 100);
+        }
+
+        function updateSnakeGame() {
+            // Движение змейки
+            const head = { x: snake[0].x + dx, y: snake[0].y + dy };
+
+            // Проверка столкновения со стенами
+            if (head.x < 0 || head.x >= tileCount || head.y < 0 || head.y >= tileCount) {
+                gameOver();
                 return;
             }
 
-            const hours = Math.floor(diff / (1000 * 60 * 60));
-            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+            // Проверка столкновения с собой
+            for (let segment of snake) {
+                if (segment.x === head.x && segment.y === head.y) {
+                    gameOver();
+                    return;
+                }
+            }
 
-            document.getElementById('hours').textContent = String(hours).padStart(2, '0');
-            document.getElementById('minutes').textContent = String(minutes).padStart(2, '0');
-            document.getElementById('seconds').textContent = String(seconds).padStart(2, '0');
+            snake.unshift(head);
+
+            // Проверка поедания еды
+            if (head.x === food.x && head.y === food.y) {
+                score++;
+                scoreElement.textContent = score;
+                generateFood();
+            } else {
+                snake.pop();
+            }
+
+            drawSnakeGame();
         }
 
-        // Обновляем таймер каждую секунду
-        updateCountdown();
-        setInterval(updateCountdown, 1000);
+        function drawSnakeGame() {
+            // Очистка canvas
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        console.log('🎮 Готовимся к live coding!');
-        console.log('Сегодня в 16:00 здесь появится змейка');
+            // Отрисовка еды
+            ctx.fillStyle = '#FF6B6B';
+            ctx.fillRect(food.x * gridSize, food.y * gridSize, gridSize - 2, gridSize - 2);
+
+            // Отрисовка змейки
+            ctx.fillStyle = '#4ECDC4';
+            for (let i = 0; i < snake.length; i++) {
+                const segment = snake[i];
+                const alpha = 1 - (i / snake.length) * 0.5;
+                ctx.fillStyle = `rgba(78, 205, 196, ${alpha})`;
+                ctx.fillRect(segment.x * gridSize, segment.y * gridSize, gridSize - 2, gridSize - 2);
+            }
+        }
+
+        function generateFood() {
+            food.x = Math.floor(Math.random() * tileCount);
+            food.y = Math.floor(Math.random() * tileCount);
+
+            // Проверка, что еда не появилась на змейке
+            for (let segment of snake) {
+                if (segment.x === food.x && segment.y === food.y) {
+                    generateFood();
+                    return;
+                }
+            }
+        }
+
+        function gameOver() {
+            clearInterval(gameLoop);
+            gameStarted = false;
+
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = 'white';
+            ctx.font = '30px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Игра окончена!', canvas.width / 2, canvas.height / 2 - 20);
+            ctx.font = '20px Arial';
+            ctx.fillText(`Счёт: ${score}`, canvas.width / 2, canvas.height / 2 + 20);
+        }
+
+        // Управление
+        document.addEventListener('keydown', (e) => {
+            if (!gameStarted) return;
+
+            switch(e.key) {
+                case 'ArrowUp':
+                case 'w':
+                case 'W':
+                    if (dy === 0) { dx = 0; dy = -1; }
+                    break;
+                case 'ArrowDown':
+                case 's':
+                case 'S':
+                    if (dy === 0) { dx = 0; dy = 1; }
+                    break;
+                case 'ArrowLeft':
+                case 'a':
+                case 'A':
+                    if (dx === 0) { dx = -1; dy = 0; }
+                    break;
+                case 'ArrowRight':
+                case 'd':
+                case 'D':
+                    if (dx === 0) { dx = 1; dy = 0; }
+                    break;
+            }
+        });
+
+        // Начальная отрисовка
+        drawSnakeGame();
+
+        console.log('🐍 Змейка готова к игре!');
     </script>
 </body>
 </html>
