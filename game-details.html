@@ -156,6 +156,17 @@
             font-size: 1.1rem;
         }
 
+        .player-name a {
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .player-name a:hover {
+            color: #fbbf24;
+            text-decoration: underline;
+        }
+
         .role-badge {
             display: inline-block;
             padding: 5px 12px;
@@ -292,7 +303,7 @@
 
         function formatDeathTime(deathTime) {
             if (deathTime === '0') {
-                return '✅ Жив';
+                return '✅ Живой';
             }
 
             // Парсим формат "3D" или "1N"
@@ -304,18 +315,18 @@
             const number = parseInt(match[1]);
             const type = match[2]; // D = Day, N = Night
 
-            // Преобразуем число в слово
+            // Преобразуем число в слово (с заглавной буквы)
             const numberWords = {
-                1: 'первый',
-                2: 'второй',
-                3: 'третий',
-                4: 'четвёртый',
-                5: 'пятый',
-                6: 'шестой',
-                7: 'седьмой',
-                8: 'восьмой',
-                9: 'девятый',
-                10: 'десятый'
+                1: 'Первый',
+                2: 'Второй',
+                3: 'Третий',
+                4: 'Четвёртый',
+                5: 'Пятый',
+                6: 'Шестой',
+                7: 'Седьмой',
+                8: 'Восьмой',
+                9: 'Девятый',
+                10: 'Десятый'
             };
 
             const numberWord = numberWords[number] || number;
@@ -324,16 +335,16 @@
             // Для ночи используем женский род
             if (type === 'N') {
                 const nightWords = {
-                    1: 'первая',
-                    2: 'вторая',
-                    3: 'третья',
-                    4: 'четвёртая',
-                    5: 'пятая',
-                    6: 'шестая',
-                    7: 'седьмая',
-                    8: 'восьмая',
-                    9: 'девятая',
-                    10: 'десятая'
+                    1: 'Первая',
+                    2: 'Вторая',
+                    3: 'Третья',
+                    4: 'Четвёртая',
+                    5: 'Пятая',
+                    6: 'Шестая',
+                    7: 'Седьмая',
+                    8: 'Восьмая',
+                    9: 'Девятая',
+                    10: 'Десятая'
                 };
                 return `${nightWords[number] || number} ${typeWord}`;
             }
@@ -414,7 +425,7 @@
 
                 html += `
                     <tr>
-                        <td class="player-name">${player.player_name}</td>
+                        <td class="player-name"><a href="player.html?id=${player.player_id}">${player.player_name}</a></td>
                         <td><span class="role-badge ${roleClass}">${player.role}</span></td>
                         <td class="death-time">${deathText}</td>
                         <td class="${pointsClass}">${player.points > 0 ? '+' : ''}${player.points}</td>
