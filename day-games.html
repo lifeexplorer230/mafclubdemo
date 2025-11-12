@@ -243,18 +243,66 @@
             font-size: 0.9rem;
         }
 
+        .table-wrapper {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .mobile-scroll-hint {
+            display: none;
+            text-align: center;
+            font-size: 0.85rem;
+            opacity: 0.7;
+            margin-top: 10px;
+        }
+
         @media (max-width: 768px) {
             .game-title {
                 font-size: 1.5rem;
             }
 
+            .game-card {
+                padding: 20px;
+            }
+
             .players-table {
-                font-size: 0.85rem;
+                font-size: 0.75rem;
             }
 
             .players-table th,
             .players-table td {
-                padding: 10px 5px;
+                padding: 8px 4px;
+            }
+
+            .role-badge {
+                padding: 3px 8px;
+                font-size: 0.75rem;
+            }
+
+            .achievements-list li {
+                padding: 2px 6px;
+                font-size: 0.7rem;
+                margin: 1px;
+            }
+
+            .mobile-scroll-hint {
+                display: block;
+            }
+        }
+
+        /* Для очень узких экранов */
+        @media (max-width: 360px) {
+            .players-table {
+                font-size: 0.7rem;
+            }
+
+            .players-table th,
+            .players-table td {
+                padding: 6px 3px;
+            }
+
+            .container {
+                padding: 10px;
             }
         }
     </style>
@@ -479,17 +527,18 @@
                         </div>
                         ${bonusBadges ? `<div class="bonus-badges">${bonusBadges}</div>` : ''}
 
-                        <table class="players-table">
-                            <thead>
-                                <tr>
-                                    <th>Игрок</th>
-                                    <th>Роль</th>
-                                    <th>Убит</th>
-                                    <th>Очки</th>
-                                    <th>Расшифровка</th>
-                                </tr>
-                            </thead>
-                            <tbody>
+                        <div class="table-wrapper">
+                            <table class="players-table">
+                                <thead>
+                                    <tr>
+                                        <th>Игрок</th>
+                                        <th>Роль</th>
+                                        <th>Убит</th>
+                                        <th>Очки</th>
+                                        <th>Расшифровка</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
                 `;
 
                 players.forEach(player => {
@@ -528,8 +577,10 @@
                 });
 
                 html += `
-                            </tbody>
-                        </table>
+                                </tbody>
+                            </table>
+                            <div class="mobile-scroll-hint">← Свайп для прокрутки →</div>
+                        </div>
                     </div>
                 `;
             });

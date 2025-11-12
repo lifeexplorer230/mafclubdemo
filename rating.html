@@ -80,6 +80,19 @@
             text-align: center;
         }
 
+        .table-wrapper {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .mobile-scroll-hint {
+            display: none;
+            text-align: center;
+            font-size: 0.85rem;
+            opacity: 0.7;
+            margin-top: 10px;
+        }
+
         .rank-1 { color: #ffd700; font-size: 1.5rem; }
         .rank-2 { color: #c0c0c0; font-size: 1.4rem; }
         .rank-3 { color: #cd7f32; font-size: 1.3rem; }
@@ -114,16 +127,50 @@
 
         @media (max-width: 768px) {
             .rating-table {
-                font-size: 0.9rem;
+                font-size: 0.85rem;
             }
 
             .rating-table th,
             .rating-table td {
-                padding: 10px 5px;
+                padding: 8px 4px;
             }
+
+            .rank-cell {
+                width: 40px;
+                font-size: 1rem;
+            }
+
+            .rank-1 { font-size: 1.2rem; }
+            .rank-2 { font-size: 1.15rem; }
+            .rank-3 { font-size: 1.1rem; }
 
             .header h1 {
                 font-size: 2rem;
+            }
+
+            /* Скрываем колонки "Игр" и "Побед" на мобильных */
+            .hide-mobile {
+                display: none;
+            }
+
+            .mobile-scroll-hint {
+                display: block;
+            }
+        }
+
+        /* Для очень узких экранов */
+        @media (max-width: 360px) {
+            .rating-table {
+                font-size: 0.75rem;
+            }
+
+            .rating-table th,
+            .rating-table td {
+                padding: 6px 3px;
+            }
+
+            .container {
+                padding: 15px;
             }
         }
 
@@ -247,18 +294,19 @@
             });
 
             let html = `
-                <table class="rating-table">
-                    <thead>
-                        <tr>
-                            <th>Место</th>
-                            <th>Игрок</th>
-                            <th class="sortable ${currentSortBy === 'games' ? 'active' : ''}" onclick="sortBy('games')">Игр</th>
-                            <th class="sortable ${currentSortBy === 'points' ? 'active' : ''}" onclick="sortBy('points')">Очки</th>
-                            <th class="sortable ${currentSortBy === 'average' ? 'active' : ''}" onclick="sortBy('average')">Среднее</th>
-                            <th class="sortable ${currentSortBy === 'wins' ? 'active' : ''}" onclick="sortBy('wins')">Побед</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+                <div class="table-wrapper">
+                    <table class="rating-table">
+                        <thead>
+                            <tr>
+                                <th>Место</th>
+                                <th>Игрок</th>
+                                <th class="sortable hide-mobile ${currentSortBy === 'games' ? 'active' : ''}" onclick="sortBy('games')">Игр</th>
+                                <th class="sortable ${currentSortBy === 'points' ? 'active' : ''}" onclick="sortBy('points')">Очки</th>
+                                <th class="sortable ${currentSortBy === 'average' ? 'active' : ''}" onclick="sortBy('average')">Среднее</th>
+                                <th class="sortable hide-mobile ${currentSortBy === 'wins' ? 'active' : ''}" onclick="sortBy('wins')">Побед</th>
+                            </tr>
+                        </thead>
+                        <tbody>
             `;
 
             // Функция для получения значения по критерию сортировки
@@ -301,10 +349,10 @@
                     <tr onclick="openPlayer(${player.id})">
                         <td class="rank-cell ${rankClass}">${player.rank}</td>
                         <td class="player-name">${player.name}</td>
-                        <td>${player.games_played}</td>
+                        <td class="hide-mobile">${player.games_played}</td>
                         <td class="${pointsClass}">${player.total_points > 0 ? '+' : ''}${player.total_points}</td>
                         <td>${avgPoints}</td>
-                        <td>${player.wins}</td>
+                        <td class="hide-mobile">${player.wins}</td>
                     </tr>
                 `;
             });
@@ -312,6 +360,8 @@
             html += `
                     </tbody>
                 </table>
+                <div class="mobile-scroll-hint">← Свайп для прокрутки →</div>
+            </div>
             `;
 
             document.getElementById('content').innerHTML = html;
