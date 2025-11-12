@@ -192,7 +192,18 @@
 </head>
 <body>
     <div class="container">
-        <a href="rating.html" class="back-link">← Назад к рейтингу</a>
+        <!-- Меню навигации -->
+        <nav style="display: flex; gap: 15px; justify-content: center; margin-bottom: 30px; flex-wrap: wrap;">
+            <a href="rating.html" style="color: white; text-decoration: none; font-size: 1rem; padding: 12px 24px; background: rgba(255, 255, 255, 0.15); border-radius: 10px; transition: all 0.3s;" onmouseover="this.style.background='rgba(255, 255, 255, 0.25)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.15)'">
+                🏆 Главная
+            </a>
+            <a href="day-stats.html" style="color: white; text-decoration: none; font-size: 1rem; padding: 12px 24px; background: rgba(255, 255, 255, 0.15); border-radius: 10px; transition: all 0.3s;" onmouseover="this.style.background='rgba(255, 255, 255, 0.25)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.15)'">
+                📊 Статистика по дням
+            </a>
+            <a href="rating-rules.html" style="color: white; text-decoration: none; font-size: 1rem; padding: 12px 24px; background: rgba(255, 255, 255, 0.3); border-radius: 10px; transition: all 0.3s; border: 2px solid rgba(255, 255, 255, 0.5);" onmouseover="this.style.background='rgba(255, 255, 255, 0.4)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.3)'">
+                📖 Как работает рейтинг
+            </a>
+        </nav>
 
         <div class="header">
             <h1>📖 Как работает рейтинг</h1>
@@ -219,7 +230,7 @@
                     <li><strong>+1 очко</strong> — за чистую победу <span class="bonus-badge">бонус</span></li>
                     <li><strong>+2 очка</strong> — за угадайку <span class="bonus-badge">бонус</span></li>
                 </ul>
-                <div class="max-points">⭐ Максимум: 7 очков</div>
+                <div class="max-points">⭐ Максимум: 6 очков (чистая победа и угадайка несовместимы)</div>
             </div>
 
             <!-- Мафия -->
@@ -230,7 +241,7 @@
                     <li><strong>+1 очко</strong> — за победу в сухую <span class="bonus-badge">бонус</span></li>
                     <li><strong>+3 очка</strong> — за угадайку <span class="bonus-badge">бонус</span></li>
                 </ul>
-                <div class="max-points">⭐ Максимум: 9 очков</div>
+                <div class="max-points">⭐ Максимум: 8 очков (победа в сухую и угадайка несовместимы)</div>
             </div>
 
             <!-- Дон -->
@@ -244,7 +255,7 @@
                     <li><strong>+3 очка</strong> — за угадайку <span class="bonus-badge">бонус</span></li>
                     <li><strong>-3 очка</strong> — при поражении <span class="penalty-badge">штраф</span></li>
                 </ul>
-                <div class="max-points">⭐ Максимум: 13 очков | Минимум: -3 очка</div>
+                <div class="max-points">⭐ Максимум: 12 очков (победа в сухую и угадайка несовместимы) | Минимум: -3 очка</div>
             </div>
 
             <!-- Шериф -->
@@ -260,7 +271,7 @@
                     <li><strong>-3 очка</strong> — при поражении <span class="penalty-badge">штраф</span></li>
                     <li><strong>-1 очко</strong> — если покинул игру в 1-й или 2-й день <span class="penalty-badge">штраф</span></li>
                 </ul>
-                <div class="max-points">⭐ Максимум: 13 очков | Минимум: -4 очка</div>
+                <div class="max-points">⭐ Максимум: 14 очков (чистая победа и угадайка несовместимы) | Минимум: -4 очка</div>
             </div>
         </div>
 
@@ -348,7 +359,7 @@
     </div>
 
     <a href="login.html" style="position: fixed; bottom: 10px; right: 10px; opacity: 0.5; font-size: 0.75rem; background: rgba(0,0,0,0.3); padding: 5px 10px; border-radius: 5px; text-decoration: none; color: white; transition: opacity 0.3s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='0.5'">
-        v1.2.0
+        v2.1.0
     </a>
 </body>
 </html>

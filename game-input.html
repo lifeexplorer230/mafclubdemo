@@ -238,6 +238,18 @@
             <button class="btn btn-primary" onclick="startGame()">Начать ввод игры</button>
         </div>
 
+        <!-- Секция удаления игр -->
+        <div id="deleteSection" class="section">
+            <div class="game-header">🗑️ Удалить игру</div>
+            <div class="form-group">
+                <label for="gameToDelete">Выберите игру для удаления:</label>
+                <select id="gameToDelete" style="width: 100%; padding: 12px; border-radius: 8px; border: none; background: rgba(255, 255, 255, 0.9); color: #333; font-size: 1rem;">
+                    <option value="">Загрузка...</option>
+                </select>
+            </div>
+            <button class="btn" style="background: rgba(248, 113, 113, 0.3); border-color: #f87171;" onclick="deleteSelectedGame()">🗑️ Удалить выбранную игру</button>
+        </div>
+
         <!-- Шаг 2: Ввод игр -->
         <div id="step2" class="hidden">
             <div id="gamesContainer"></div>
@@ -305,7 +317,83 @@
         document.addEventListener('DOMContentLoaded', function() {
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('gameDate').value = today;
+
+            // Загружаем список игр для удаления
+            loadGamesForDeletion();
         });
+
+        // Загрузка списка всех игр
+        async function loadGamesForDeletion() {
+            try {
+                const response = await fetch('/api/all-games');
+                if (!response.ok) {
+                    throw new Error('Не удалось загрузить список игр');
+                }
+
+                const data = await response.json();
+                const select = document.getElementById('gameToDelete');
+                select.innerHTML = '<option value="">-- Выберите игру --</option>';
+
+                if (data.games && data.games.length > 0) {
+                    // Сортируем игры по номеру (по возрастанию)
+                    data.games.sort((a, b) => a.game_number - b.game_number);
+
+                    data.games.forEach(game => {
+                        const date = new Date(game.date).toLocaleDateString('ru-RU');
+                        const option = document.createElement('option');
+                        option.value = game.id;
+                        option.textContent = `Игра № ${game.game_number} от ${date} (${game.winner === 'Мирные' ? '🏡 Мирные' : '🔫 Мафия'})`;
+                        select.appendChild(option);
+                    });
+                } else {
+                    select.innerHTML = '<option value="">Нет игр для удаления</option>';
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки игр:', error);
+                const select = document.getElementById('gameToDelete');
+                select.innerHTML = '<option value="">Ошибка загрузки</option>';
+            }
+        }
+
+        // Удаление выбранной игры
+        async function deleteSelectedGame() {
+            const select = document.getElementById('gameToDelete');
+            const gameId = select.value;
+
+            if (!gameId) {
+                alert('Выберите игру для удаления');
+                return;
+            }
+
+            const selectedOption = select.options[select.selectedIndex];
+            const gameInfo = selectedOption.textContent;
+
+            if (!confirm(`Вы уверены, что хотите удалить эту игру?\n\n${gameInfo}\n\nИгра будет удалена без изменения нумерации остальных игр.`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/games/${gameId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': 'Bearer egor_admin'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    alert(`✅ Игра № ${data.deleted_game_number} успешно удалена!`);
+                    // Перезагружаем список игр
+                    await loadGamesForDeletion();
+                } else {
+                    alert('❌ Ошибка удаления: ' + (data.error || 'Неизвестная ошибка'));
+                }
+            } catch (error) {
+                alert('❌ Ошибка сети: ' + error.message);
+                console.error('Ошибка удаления игры:', error);
+            }
+        }
 
         function startGame() {
             gameDate = document.getElementById('gameDate').value;
@@ -612,7 +700,7 @@
     </script>
 
     <a href="rating.html" style="position: fixed; bottom: 10px; right: 10px; opacity: 0.5; font-size: 0.75rem; background: rgba(0,0,0,0.3); padding: 5px 10px; border-radius: 5px; text-decoration: none; color: white; transition: opacity 0.3s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='0.5'">
-        v1.2.0
+        v2.0.0
     </a>
 </body>
 </html>

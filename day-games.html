@@ -261,7 +261,18 @@
 </head>
 <body>
     <div class="container">
-        <a href="day-stats.html" class="back-link">← Назад к статистике по дням</a>
+        <!-- Меню навигации -->
+        <nav style="display: flex; gap: 15px; justify-content: center; margin-bottom: 30px; flex-wrap: wrap;">
+            <a href="rating.html" style="color: white; text-decoration: none; font-size: 1rem; padding: 12px 24px; background: rgba(255, 255, 255, 0.15); border-radius: 10px; transition: all 0.3s;" onmouseover="this.style.background='rgba(255, 255, 255, 0.25)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.15)'">
+                🏆 Главная
+            </a>
+            <a href="day-stats.html" style="color: white; text-decoration: none; font-size: 1rem; padding: 12px 24px; background: rgba(255, 255, 255, 0.15); border-radius: 10px; transition: all 0.3s;" onmouseover="this.style.background='rgba(255, 255, 255, 0.25)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.15)'">
+                📊 Статистика по дням
+            </a>
+            <a href="rating-rules.html" style="color: white; text-decoration: none; font-size: 1rem; padding: 12px 24px; background: rgba(255, 255, 255, 0.15); border-radius: 10px; transition: all 0.3s;" onmouseover="this.style.background='rgba(255, 255, 255, 0.25)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.15)'">
+                📖 Как работает рейтинг
+            </a>
+        </nav>
 
         <div class="page-header">
             <h1>🎮 Игры дня</h1>
@@ -326,7 +337,21 @@
             }
 
             // Проверяем угадайку в достижениях
-            if (player.achievements && player.achievements.includes('Угадайка')) {
+            let achievements = [];
+            if (player.achievements) {
+                // Парсим JSON если это строка
+                if (typeof player.achievements === 'string') {
+                    try {
+                        achievements = JSON.parse(player.achievements);
+                    } catch (e) {
+                        achievements = [];
+                    }
+                } else if (Array.isArray(player.achievements)) {
+                    achievements = player.achievements;
+                }
+            }
+
+            if (achievements.includes('Угадайка')) {
                 if (role === 'Мирный') {
                     breakdown.push('Угадайка (+2)');
                 } else if (role === 'Мафия' || role === 'Дон') {
@@ -517,7 +542,7 @@
     </script>
 
     <a href="login.html" style="position: fixed; bottom: 10px; right: 10px; opacity: 0.5; font-size: 0.75rem; background: rgba(0,0,0,0.3); padding: 5px 10px; border-radius: 5px; text-decoration: none; color: white; transition: opacity 0.3s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='0.5'">
-        v1.6.0
+        v2.1.0
     </a>
 </body>
 </html>

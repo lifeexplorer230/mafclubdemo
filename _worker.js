@@ -18,8 +18,8 @@ export default {
 async function handleAPI(request, env, url) {
   const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     'Content-Type': 'application/json'
   };
 
@@ -71,6 +71,11 @@ async function handleAPI(request, env, url) {
         });
       }
       return await getDayGames(env, corsHeaders, date);
+    }
+
+    // GET /api/all-games - список всех игр для админ-панели
+    if (url.pathname === '/api/all-games' && request.method === 'GET') {
+      return await getAllGames(env, corsHeaders);
     }
 
     // DELETE /api/games/:id - удаление игры (только для авторизованных)
@@ -180,21 +185,32 @@ async function saveSession(request, env, corsHeaders) {
 
   const sessionId = sessionResult.meta.last_row_id;
 
-  // 2. Получаем максимальный номер игры для сквозной нумерации
-  const maxGameNumber = await db.prepare(
-    'SELECT COALESCE(MAX(game_number), 0) as max_num FROM games'
-  ).first();
+  // 2. Получаем все существующие номера игр для поиска пропусков
+  const existingNumbers = await db.prepare(
+    'SELECT game_number FROM games ORDER BY game_number ASC'
+  ).all();
 
-  let currentGameNumber = maxGameNumber.max_num;
+  const usedNumbers = new Set(existingNumbers.results.map(r => r.game_number));
+
+  // Функция для поиска следующего свободного номера
+  const getNextGameNumber = () => {
+    // Ищем первый пропуск
+    let num = 1;
+    while (usedNumbers.has(num)) {
+      num++;
+    }
+    usedNumbers.add(num); // Отмечаем как использованный для следующих игр в сессии
+    return num;
+  };
 
   // 3. Сохраняем каждую игру
   for (const game of sessionData.games) {
-    currentGameNumber++;
+    const gameNumber = getNextGameNumber();
     const gameResult = await db.prepare(
       'INSERT INTO games (session_id, game_number, winner, is_clean_win, is_dry_win) VALUES (?, ?, ?, ?, ?)'
     ).bind(
       sessionId,
-      currentGameNumber,
+      gameNumber,
       game.winner,
       game.is_clean_win ? 1 : 0,
       game.is_dry_win ? 1 : 0
@@ -511,6 +527,43 @@ async function getDayGames(env, corsHeaders, date) {
   });
 }
 
+// Получить список всех игр (для админ-панели)
+async function getAllGames(env, corsHeaders) {
+  const db = env.DB;
+
+  try {
+    // Получаем все игры с датами из game_sessions
+    const games = await db.prepare(`
+      SELECT
+        g.id,
+        g.game_number,
+        gs.date,
+        g.winner
+      FROM games g
+      LEFT JOIN game_sessions gs ON g.session_id = gs.id
+      ORDER BY g.game_number ASC
+    `).all();
+
+    return new Response(JSON.stringify({
+      success: true,
+      games: games.results || []
+    }), {
+      status: 200,
+      headers: corsHeaders
+    });
+
+  } catch (error) {
+    console.error('Get all games error:', error);
+    return new Response(JSON.stringify({
+      error: 'Failed to load games',
+      details: error.message
+    }), {
+      status: 500,
+      headers: corsHeaders
+    });
+  }
+}
+
 // Удалить игру (только для авторизованных)
 async function deleteGame(request, env, corsHeaders, gameId) {
   const db = env.DB;
@@ -547,24 +600,12 @@ async function deleteGame(request, env, corsHeaders, gameId) {
     // 2. Удаляем саму игру
     await db.prepare('DELETE FROM games WHERE id = ?').bind(gameId).run();
 
-    // 3. Пересчитываем нумерацию всех игр после удалённой
-    // Получаем все игры с номерами больше удалённой
-    const gamesToUpdate = await db.prepare(
-      'SELECT id, game_number FROM games WHERE game_number > ? ORDER BY game_number ASC'
-    ).bind(deletedGameNumber).all();
-
-    // Уменьшаем номер каждой игры на 1
-    for (const g of gamesToUpdate.results) {
-      await db.prepare(
-        'UPDATE games SET game_number = ? WHERE id = ?'
-      ).bind(g.game_number - 1, g.id).run();
-    }
+    // Не перенумеровываем - оставляем пропуск, который заполнится при добавлении новой игры
 
     return new Response(JSON.stringify({
       success: true,
       message: 'Game deleted successfully',
-      deleted_game_number: deletedGameNumber,
-      renumbered_games: gamesToUpdate.results.length
+      deleted_game_number: deletedGameNumber
     }), {
       status: 200,
       headers: corsHeaders

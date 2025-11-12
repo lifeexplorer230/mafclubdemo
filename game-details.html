@@ -281,7 +281,18 @@
 </head>
 <body>
     <div class="container">
-        <a href="javascript:history.back()" class="back-link">← Назад</a>
+        <!-- Меню навигации -->
+        <nav style="display: flex; gap: 15px; justify-content: center; margin-bottom: 30px; flex-wrap: wrap;">
+            <a href="rating.html" style="color: white; text-decoration: none; font-size: 1rem; padding: 12px 24px; background: rgba(255, 255, 255, 0.15); border-radius: 10px; transition: all 0.3s;" onmouseover="this.style.background='rgba(255, 255, 255, 0.25)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.15)'">
+                🏆 Главная
+            </a>
+            <a href="day-stats.html" style="color: white; text-decoration: none; font-size: 1rem; padding: 12px 24px; background: rgba(255, 255, 255, 0.15); border-radius: 10px; transition: all 0.3s;" onmouseover="this.style.background='rgba(255, 255, 255, 0.25)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.15)'">
+                📊 Статистика по дням
+            </a>
+            <a href="rating-rules.html" style="color: white; text-decoration: none; font-size: 1rem; padding: 12px 24px; background: rgba(255, 255, 255, 0.15); border-radius: 10px; transition: all 0.3s;" onmouseover="this.style.background='rgba(255, 255, 255, 0.25)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.15)'">
+                📖 Как работает рейтинг
+            </a>
+        </nav>
 
         <div id="content">
             <div class="loading">Загрузка данных об игре...</div>
@@ -376,7 +387,21 @@
             }
 
             // Проверяем угадайку в достижениях
-            if (player.achievements && player.achievements.includes('Угадайка')) {
+            let achievements = [];
+            if (player.achievements) {
+                // Парсим JSON если это строка
+                if (typeof player.achievements === 'string') {
+                    try {
+                        achievements = JSON.parse(player.achievements);
+                    } catch (e) {
+                        achievements = [];
+                    }
+                } else if (Array.isArray(player.achievements)) {
+                    achievements = player.achievements;
+                }
+            }
+
+            if (achievements.includes('Угадайка')) {
                 if (role === 'Мирный') {
                     breakdown.push('Угадайка (+2)');
                 } else if (role === 'Мафия' || role === 'Дон') {
@@ -538,18 +563,26 @@
             document.getElementById('content').innerHTML = html;
 
             // Показываем кнопку удаления для авторизованных
-            const isLoggedIn = localStorage.getItem('auth_token') === 'egor_admin';
+            const authToken = localStorage.getItem('auth_token');
+            console.log('Auth token:', authToken); // Отладка
+            const isLoggedIn = authToken === 'egor_admin';
+            console.log('Is logged in:', isLoggedIn); // Отладка
+
             if (isLoggedIn) {
                 const deleteBtn = document.getElementById('deleteBtn');
-                deleteBtn.style.display = 'block';
-                deleteBtn.setAttribute('data-game-id', game.id);
+                console.log('Delete button found:', deleteBtn); // Отладка
+                if (deleteBtn) {
+                    deleteBtn.style.display = 'block';
+                    deleteBtn.setAttribute('data-game-id', game.id);
+                    console.log('Delete button shown for game ID:', game.id); // Отладка
+                }
             }
         }
 
         async function deleteGameHandler() {
             const gameId = document.getElementById('deleteBtn').getAttribute('data-game-id');
 
-            if (!confirm('Вы уверены, что хотите удалить эту игру? Нумерация остальных игр будет пересчитана.')) {
+            if (!confirm('Вы уверены, что хотите удалить эту игру? Игра будет удалена без изменения нумерации остальных игр.')) {
                 return;
             }
 
@@ -566,7 +599,7 @@
                 const data = await response.json();
 
                 if (response.ok && data.success) {
-                    alert(`Игра № ${data.deleted_game_number} успешно удалена. Пересчитано игр: ${data.renumbered_games}`);
+                    alert(`Игра № ${data.deleted_game_number} успешно удалена.`);
                     window.location.href = 'rating.html';
                 } else {
                     alert('Ошибка удаления: ' + (data.error || 'Неизвестная ошибка'));
@@ -581,7 +614,7 @@
     </script>
 
     <a href="login.html" style="position: fixed; bottom: 10px; right: 10px; opacity: 0.5; font-size: 0.75rem; background: rgba(0,0,0,0.3); padding: 5px 10px; border-radius: 5px; text-decoration: none; color: white; transition: opacity 0.3s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='0.5'">
-        v1.3.1
+        v2.1.0
     </a>
 </body>
 </html>
