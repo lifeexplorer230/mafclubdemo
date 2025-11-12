@@ -40,6 +40,8 @@ export default async function handler(request, response) {
     const daysWithBestPlayers = [];
 
     for (const day of result.rows) {
+      console.log('Finding best player for session:', day.session_id, 'date:', day.date);
+
       const bestPlayerQuery = await db.execute({
         sql: `
           SELECT
@@ -59,6 +61,8 @@ export default async function handler(request, response) {
         `,
         args: [day.session_id]
       });
+
+      console.log('Best player query result:', bestPlayerQuery.rows);
 
       const bestPlayer = bestPlayerQuery.rows.length > 0 ? {
         name: bestPlayerQuery.rows[0].name,
