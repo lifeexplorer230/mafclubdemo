@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Статистика по дням - МАФ-Клуб</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            text-decoration: none;
+            color: white;
+            transition: all 0.3s;
+        }
+
+        .back-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .day-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            padding: 30px;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+
+        .day-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.5);
+        }
+
+        .day-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .day-date {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+
+        .day-info {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .best-player {
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.3), rgba(245, 158, 11, 0.3));
+            border: 2px solid rgba(251, 191, 36, 0.5);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 15px;
+        }
+
+        .best-player-title {
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            color: #fbbf24;
+        }
+
+        .best-player-name {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .best-player-stats {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .best-player-stats strong {
+            color: #fbbf24;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            font-size: 1.5rem;
+        }
+
+        .error {
+            background: rgba(248, 113, 113, 0.3);
+            border: 2px solid rgba(248, 113, 113, 0.5);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            font-size: 1.2rem;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 50px;
+            font-size: 1.3rem;
+            opacity: 0.8;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #4ade80;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .day-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Главная</a>
+
+        <div class="header">
+            <h1>📊 Статистика по игровым дням</h1>
+            <p>История игровых сессий МАФ-Клуб «SHOWTIME»</p>
+        </div>
+
+        <div id="loading" class="loading">
+            ⏳ Загрузка данных...
+        </div>
+
+        <div id="error" class="error" style="display: none;">
+            ❌ Ошибка загрузки данных
+        </div>
+
+        <div id="content"></div>
+    </div>
+
+    <script>
+        async function loadDayStats() {
+            try {
+                console.log('Загрузка статистики по дням...');
+
+                const response = await fetch('/api/day-stats');
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                console.log('Данные получены:', data);
+
+                document.getElementById('loading').style.display = 'none';
+
+                if (!data.success || !data.days || data.days.length === 0) {
+                    document.getElementById('content').innerHTML = `
+                        <div class="no-data">
+                            📭 Пока нет игровых дней<br>
+                            <small>Добавьте первую игру через <a href="game-input.html" style="color: #4ade80;">форму ввода</a></small>
+                        </div>
+                    `;
+                    return;
+                }
+
+                renderDays(data.days);
+
+            } catch (error) {
+                console.error('Ошибка загрузки:', error);
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('error').style.display = 'block';
+                document.getElementById('error').innerHTML = `
+                    ❌ Ошибка загрузки данных<br>
+                    <small>${error.message}</small>
+                `;
+            }
+        }
+
+        function renderDays(days) {
+            const content = document.getElementById('content');
+            let html = '';
+
+            for (const day of days) {
+                const dateObj = new Date(day.date + 'T00:00:00');
+                const formattedDate = dateObj.toLocaleDateString('ru-RU', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+
+                html += `
+                    <div class="day-card">
+                        <div class="day-header">
+                            <div>
+                                <div class="day-date">📅 ${formattedDate}</div>
+                                <div class="day-info">${day.date}</div>
+                            </div>
+                        </div>
+
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <div class="stat-value">${day.total_games}</div>
+                                <div class="stat-label">Игр сыграно</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">${day.total_players}</div>
+                                <div class="stat-label">Игроков участвовало</div>
+                            </div>
+                        </div>
+
+                        ${day.best_player ? `
+                            <div class="best-player">
+                                <div class="best-player-title">🏆 Лучший игрок дня</div>
+                                <div class="best-player-name">${day.best_player.name}</div>
+                                <div class="best-player-stats">
+                                    Средний балл за выигрыш: <strong>${day.best_player.avg_points_per_win}</strong><br>
+                                    Всего очков: ${day.best_player.total_points} |
+                                    Выигрышей: ${day.best_player.wins} |
+                                    Игр сыграно: ${day.best_player.games_played}
+                                </div>
+                            </div>
+                        ` : '<div class="no-data">Нет данных о лучшем игроке</div>'}
+                    </div>
+                `;
+            }
+
+            content.innerHTML = html;
+        }
+
+        // Загружаем данные при загрузке страницы
+        loadDayStats();
+    </script>
+
+    <div style="position: fixed; bottom: 10px; right: 10px; opacity: 0.5; font-size: 0.75rem; background: rgba(0,0,0,0.3); padding: 5px 10px; border-radius: 5px;">
+        v1.0.8
+    </div>
+</body>
+</html>

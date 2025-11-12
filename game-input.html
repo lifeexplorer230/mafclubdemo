@@ -187,10 +187,14 @@
             <p>МАФ-Клуб «SHOWTIME»</p>
         </div>
 
-        <!-- Шаг 1: Количество игр -->
+        <!-- Шаг 1: Количество игр и дата -->
         <div id="step1" class="section">
             <div class="form-group">
-                <label for="totalGames">Сколько игр будет сыграно за игровой день?</label>
+                <label for="gameDate">📅 Дата игрового дня:</label>
+                <input type="date" id="gameDate" required>
+            </div>
+            <div class="form-group">
+                <label for="totalGames">🎮 Сколько игр будет сыграно?</label>
                 <input type="number" id="totalGames" min="1" max="10" value="4">
             </div>
             <button class="btn btn-primary" onclick="startGames()">Начать ввод игр</button>
@@ -258,9 +262,22 @@
 
         let totalGames = 0;
         let gamesData = [];
+        let gameDate = '';
+
+        // Устанавливаем сегодняшнюю дату по умолчанию
+        document.addEventListener('DOMContentLoaded', function() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('gameDate').value = today;
+        });
 
         function startGames() {
+            gameDate = document.getElementById('gameDate').value;
             totalGames = parseInt(document.getElementById('totalGames').value);
+
+            if (!gameDate) {
+                alert('Выберите дату игрового дня');
+                return;
+            }
 
             if (totalGames < 1 || totalGames > 10) {
                 alert('Количество игр должно быть от 1 до 10');
@@ -344,7 +361,7 @@
 
                 // Подготавливаем данные сессии
                 const sessionData = {
-                    date: new Date().toISOString().split('T')[0], // YYYY-MM-DD
+                    date: gameDate, // Выбранная дата игрового дня
                     games: gamesData
                 };
 
