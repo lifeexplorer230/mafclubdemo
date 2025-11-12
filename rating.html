@@ -126,6 +126,37 @@
                 font-size: 2rem;
             }
         }
+
+        .sort-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .sort-btn {
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .sort-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .sort-btn.active {
+            background: rgba(251, 191, 36, 0.3);
+            border-color: #fbbf24;
+            color: #fbbf24;
+        }
     </style>
 </head>
 <body>
@@ -133,6 +164,13 @@
         <div class="header">
             <h1>🏆 Рейтинг игроков</h1>
             <p>MafClub.biz</p>
+        </div>
+
+        <div class="sort-controls" id="sortControls" style="display: none;">
+            <button class="sort-btn active" onclick="sortBy('points')">По очкам</button>
+            <button class="sort-btn" onclick="sortBy('games')">По играм</button>
+            <button class="sort-btn" onclick="sortBy('average')">По среднему баллу</button>
+            <button class="sort-btn" onclick="sortBy('wins')">По победам</button>
         </div>
 
         <div id="content">
@@ -150,6 +188,9 @@
     </div>
 
     <script>
+        let allPlayers = [];
+        let currentSortBy = 'points';
+
         async function loadRating() {
             try {
                 // Загружаем из API
@@ -163,7 +204,10 @@
 
                 // API возвращает {success: true, players: [...]}
                 if (data.success && data.players) {
-                    displayRating(data.players);
+                    allPlayers = data.players;
+                    // Показываем кнопки сортировки
+                    document.getElementById('sortControls').style.display = 'flex';
+                    displayRating();
                 } else {
                     throw new Error('Неверный формат данных от API');
                 }
@@ -177,7 +221,20 @@
             }
         }
 
-        function displayRating(rating) {
+        function sortBy(criteria) {
+            currentSortBy = criteria;
+
+            // Обновляем активную кнопку
+            document.querySelectorAll('.sort-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            displayRating();
+        }
+
+        function displayRating() {
+            const rating = [...allPlayers];
             if (!rating || rating.length === 0) {
                 document.getElementById('content').innerHTML = `
                     <div class="error">
@@ -186,6 +243,24 @@
                 `;
                 return;
             }
+
+            // Сортировка по выбранному критерию
+            rating.sort((a, b) => {
+                switch(currentSortBy) {
+                    case 'points':
+                        return b.total_points - a.total_points;
+                    case 'games':
+                        return b.games_played - a.games_played;
+                    case 'average':
+                        const avgA = a.games_played > 0 ? a.total_points / a.games_played : 0;
+                        const avgB = b.games_played > 0 ? b.total_points / b.games_played : 0;
+                        return avgB - avgA;
+                    case 'wins':
+                        return b.wins - a.wins;
+                    default:
+                        return b.total_points - a.total_points;
+                }
+            });
 
             let html = `
                 <table class="rating-table">
@@ -202,12 +277,28 @@
                     <tbody>
             `;
 
+            // Функция для получения значения по критерию сортировки
+            const getValue = (player) => {
+                switch(currentSortBy) {
+                    case 'points':
+                        return player.total_points;
+                    case 'games':
+                        return player.games_played;
+                    case 'average':
+                        return player.games_played > 0 ? player.total_points / player.games_played : 0;
+                    case 'wins':
+                        return player.wins;
+                    default:
+                        return player.total_points;
+                }
+            };
+
             // Добавляем ранг к каждому игроку
             let rank = 1;
             rating.forEach((player, index) => {
                 player.rank = rank;
-                // Если следующий игрок имеет другие очки, увеличиваем ранг
-                if (index < rating.length - 1 && rating[index + 1].total_points !== player.total_points) {
+                // Если следующий игрок имеет другое значение, увеличиваем ранг
+                if (index < rating.length - 1 && getValue(rating[index + 1]) !== getValue(player)) {
                     rank = index + 2;
                 }
             });
