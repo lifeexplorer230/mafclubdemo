@@ -169,22 +169,23 @@
     <script>
         async function loadRating() {
             try {
-                // Пробуем загрузить из API
-                let response = await fetch('/api/rating');
-
-                // Если API недоступен, пробуем загрузить из локального JSON
-                if (!response.ok) {
-                    console.log('API недоступен, загружаем из data/rating.json');
-                    response = await fetch('data/rating.json');
-                }
+                // Загружаем из API
+                const response = await fetch('/api/rating');
 
                 if (!response.ok) {
-                    throw new Error('Не удалось загрузить данные');
+                    throw new Error(`HTTP ${response.status}`);
                 }
 
-                const rating = await response.json();
-                displayRating(rating);
+                const data = await response.json();
+
+                // API возвращает {success: true, players: [...]}
+                if (data.success && data.players) {
+                    displayRating(data.players);
+                } else {
+                    throw new Error('Неверный формат данных от API');
+                }
             } catch (error) {
+                console.error('Ошибка загрузки:', error);
                 document.getElementById('content').innerHTML = `
                     <div class="error">
                         ⚠️ Ошибка загрузки данных: ${error.message}
@@ -252,7 +253,7 @@
     </script>
 
     <div style="position: fixed; bottom: 10px; right: 10px; opacity: 0.5; font-size: 0.75rem; background: rgba(0,0,0,0.3); padding: 5px 10px; border-radius: 5px;">
-        v1.0.7
+        v1.0.9
     </div>
 </body>
 </html>
