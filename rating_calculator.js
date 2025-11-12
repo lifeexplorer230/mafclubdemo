@@ -48,10 +48,19 @@ function calculateGame(players, sheriffChecksStr) {
             }
         } else if (player.role === 'Дон') {
             if (won) {
-                points += 3; // Победа за дона
+                points += 5; // Победа за мафию (базовые очки команды)
+                points += 3; // Дополнительно за роль Дона
                 if (isAlive) {
                     points += 1; // Не покидал стола
                     achievements.push('Не покидал стола');
+                }
+                if (analysis.is_dry_win) {
+                    points += 1; // Победа в сухую
+                    achievements.push('Победа в сухую');
+                }
+                if (analysis.is_guessing && analysis.guessing_players.includes(player.name)) {
+                    points += 3; // Победа в угадайке
+                    achievements.push('Победа в угадайке');
                 }
             } else {
                 points -= 3; // Поражение за дона
@@ -73,10 +82,19 @@ function calculateGame(players, sheriffChecksStr) {
             }
 
             if (won) {
-                points += 3; // Победа за шерифа
+                points += 4; // Победа за мирных (базовые очки команды)
+                points += 3; // Дополнительно за роль Шерифа
                 if (isAlive) {
                     points += 2; // Не покидал стола
                     achievements.push('Не покидал стола');
+                }
+                if (analysis.is_clean_win) {
+                    points += 1; // Чистая победа
+                    achievements.push('Чистая победа');
+                }
+                if (analysis.is_guessing && analysis.guessing_players.includes(player.name)) {
+                    points += 2; // Победа в угадайке
+                    achievements.push('Победа в угадайке');
                 }
             } else {
                 points -= 3; // Поражение за шерифа
