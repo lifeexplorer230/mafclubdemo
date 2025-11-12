@@ -401,7 +401,7 @@
                                         <th class="hide-mobile">Дата</th>
                                         <th>Игра</th>
                                         <th>Роль</th>
-                                        <th>Результат</th>
+                                        <th class="hide-mobile">Результат</th>
                                         <th>Очки</th>
                                     </tr>
                                 </thead>
@@ -419,7 +419,7 @@
                             <td class="hide-mobile"><a href="day-stats.html" class="clickable-link">${dateFormatted}</a></td>
                             <td><a href="game-details.html?id=${game.game_id}" class="clickable-link">#${game.game_number || 1}</a></td>
                             <td>${game.role}</td>
-                            <td>${game.winner === 'Мирные' ? '🏡' : '🔫'} ${game.winner}</td>
+                            <td class="hide-mobile">${game.winner === 'Мирные' ? '🏡' : '🔫'} ${game.winner}</td>
                             <td class="${pointsClass}">${game.points > 0 ? '+' : ''}${game.points}</td>
                         </tr>
                     `;
