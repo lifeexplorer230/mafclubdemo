@@ -327,11 +327,28 @@
                 document.getElementById('loading').classList.add('hidden');
 
                 if (response.ok && result.success) {
+                    let bestPlayerHtml = '';
+                    if (result.best_player_of_day) {
+                        const bp = result.best_player_of_day;
+                        bestPlayerHtml = `
+                            <div style="margin-top: 20px; padding: 20px; background: rgba(255, 215, 0, 0.2); border-radius: 10px;">
+                                <div style="font-size: 1.5rem; margin-bottom: 10px;">🏆 Лучший игрок дня</div>
+                                <div style="font-size: 2rem; font-weight: bold; margin-bottom: 10px;">${bp.name}</div>
+                                <div style="font-size: 1.1rem;">
+                                    Средний балл за выигрыш: <strong>${bp.avg_points_per_win}</strong><br>
+                                    Всего очков: ${bp.total_points} | Выигрышей: ${bp.wins} | Игр сыграно: ${bp.games_played}
+                                </div>
+                            </div>
+                        `;
+                    }
+
                     document.getElementById('result').innerHTML = `
                         <div class="section success-message">
                             ✅ Успешно сохранено!<br>
                             ID сессии: ${result.session_id}<br>
-                            Сохранено игр: ${result.games_saved}<br><br>
+                            Сохранено игр: ${result.games_saved}<br>
+                            ${bestPlayerHtml}
+                            <br>
                             <a href="rating.html" class="btn btn-primary">Посмотреть рейтинг</a>
                         </div>
                     `;

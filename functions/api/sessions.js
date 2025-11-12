@@ -92,10 +92,38 @@ export async function onRequestPost(context) {
       }
     }
 
+    // 4. Вычисляем лучшего игрока дня (по средним очкам: очки / выигрыши)
+    const bestPlayerQuery = await db.prepare(`
+      SELECT
+        p.id,
+        p.name,
+        SUM(gr.points) as total_points,
+        SUM(CASE WHEN gr.points > 0 THEN 1 ELSE 0 END) as wins,
+        COUNT(gr.id) as games_played,
+        CAST(SUM(gr.points) AS REAL) / NULLIF(SUM(CASE WHEN gr.points > 0 THEN 1 ELSE 0 END), 0) as avg_points_per_win
+      FROM players p
+      JOIN game_results gr ON p.id = gr.player_id
+      JOIN games g ON gr.game_id = g.id
+      WHERE g.session_id = ?
+      GROUP BY p.id, p.name
+      HAVING wins > 0
+      ORDER BY avg_points_per_win DESC
+      LIMIT 1
+    `).bind(sessionId).first();
+
+    const bestPlayer = bestPlayerQuery ? {
+      name: bestPlayerQuery.name,
+      total_points: bestPlayerQuery.total_points,
+      wins: bestPlayerQuery.wins,
+      games_played: bestPlayerQuery.games_played,
+      avg_points_per_win: bestPlayerQuery.avg_points_per_win ? parseFloat(bestPlayerQuery.avg_points_per_win.toFixed(2)) : 0
+    } : null;
+
     return new Response(JSON.stringify({
       success: true,
       session_id: sessionId,
-      games_saved: sessionData.games.length
+      games_saved: sessionData.games.length,
+      best_player_of_day: bestPlayer
     }), {
       status: 200,
       headers: corsHeaders
