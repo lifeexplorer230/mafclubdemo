@@ -244,6 +244,25 @@
             font-size: 0.9rem;
         }
 
+        .delete-btn {
+            display: none;
+            margin-top: 20px;
+            padding: 12px 24px;
+            background: rgba(248, 113, 113, 0.3);
+            border: 2px solid #f87171;
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1rem;
+            font-weight: bold;
+        }
+
+        .delete-btn:hover {
+            background: rgba(248, 113, 113, 0.5);
+            border-color: #ef4444;
+        }
+
         @media (max-width: 768px) {
             .game-title {
                 font-size: 2rem;
@@ -267,6 +286,10 @@
         <div id="content">
             <div class="loading">Загрузка данных об игре...</div>
         </div>
+
+        <button id="deleteBtn" class="delete-btn" onclick="deleteGameHandler()">
+            🗑️ Удалить игру
+        </button>
     </div>
 
     <script>
@@ -513,6 +536,44 @@
             `;
 
             document.getElementById('content').innerHTML = html;
+
+            // Показываем кнопку удаления для авторизованных
+            const isLoggedIn = localStorage.getItem('auth_token') === 'egor_admin';
+            if (isLoggedIn) {
+                const deleteBtn = document.getElementById('deleteBtn');
+                deleteBtn.style.display = 'block';
+                deleteBtn.setAttribute('data-game-id', game.id);
+            }
+        }
+
+        async function deleteGameHandler() {
+            const gameId = document.getElementById('deleteBtn').getAttribute('data-game-id');
+
+            if (!confirm('Вы уверены, что хотите удалить эту игру? Нумерация остальных игр будет пересчитана.')) {
+                return;
+            }
+
+            const authToken = localStorage.getItem('auth_token');
+
+            try {
+                const response = await fetch(`/api/games/${gameId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    alert(`Игра № ${data.deleted_game_number} успешно удалена. Пересчитано игр: ${data.renumbered_games}`);
+                    window.location.href = 'rating.html';
+                } else {
+                    alert('Ошибка удаления: ' + (data.error || 'Неизвестная ошибка'));
+                }
+            } catch (error) {
+                alert('Ошибка сети: ' + error.message);
+            }
         }
 
         // Загружаем данные при загрузке страницы

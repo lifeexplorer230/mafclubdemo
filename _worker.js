@@ -73,6 +73,12 @@ async function handleAPI(request, env, url) {
       return await getDayGames(env, corsHeaders, date);
     }
 
+    // DELETE /api/games/:id - удаление игры (только для авторизованных)
+    const deleteMatch = url.pathname.match(/^\/api\/games\/(\d+)$/);
+    if (deleteMatch && request.method === 'DELETE') {
+      return await deleteGame(request, env, corsHeaders, deleteMatch[1]);
+    }
+
     return new Response(JSON.stringify({ error: 'Not Found' }), {
       status: 404,
       headers: corsHeaders
@@ -503,4 +509,75 @@ async function getDayGames(env, corsHeaders, date) {
     status: 200,
     headers: corsHeaders
   });
+}
+
+// Удалить игру (только для авторизованных)
+async function deleteGame(request, env, corsHeaders, gameId) {
+  const db = env.DB;
+
+  // Проверка авторизации
+  const authHeader = request.headers.get('Authorization');
+  if (!authHeader || authHeader !== 'Bearer egor_admin') {
+    return new Response(JSON.stringify({
+      error: 'Unauthorized'
+    }), {
+      status: 401,
+      headers: corsHeaders
+    });
+  }
+
+  try {
+    // Проверяем, существует ли игра
+    const game = await db.prepare('SELECT * FROM games WHERE id = ?').bind(gameId).first();
+
+    if (!game) {
+      return new Response(JSON.stringify({
+        error: 'Game not found'
+      }), {
+        status: 404,
+        headers: corsHeaders
+      });
+    }
+
+    const deletedGameNumber = game.game_number;
+
+    // 1. Удаляем результаты игры
+    await db.prepare('DELETE FROM game_results WHERE game_id = ?').bind(gameId).run();
+
+    // 2. Удаляем саму игру
+    await db.prepare('DELETE FROM games WHERE id = ?').bind(gameId).run();
+
+    // 3. Пересчитываем нумерацию всех игр после удалённой
+    // Получаем все игры с номерами больше удалённой
+    const gamesToUpdate = await db.prepare(
+      'SELECT id, game_number FROM games WHERE game_number > ? ORDER BY game_number ASC'
+    ).bind(deletedGameNumber).all();
+
+    // Уменьшаем номер каждой игры на 1
+    for (const g of gamesToUpdate.results) {
+      await db.prepare(
+        'UPDATE games SET game_number = ? WHERE id = ?'
+      ).bind(g.game_number - 1, g.id).run();
+    }
+
+    return new Response(JSON.stringify({
+      success: true,
+      message: 'Game deleted successfully',
+      deleted_game_number: deletedGameNumber,
+      renumbered_games: gamesToUpdate.results.length
+    }), {
+      status: 200,
+      headers: corsHeaders
+    });
+
+  } catch (error) {
+    console.error('Delete game error:', error);
+    return new Response(JSON.stringify({
+      error: 'Failed to delete game',
+      details: error.message
+    }), {
+      status: 500,
+      headers: corsHeaders
+    });
+  }
 }
