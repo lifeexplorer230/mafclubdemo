@@ -309,8 +309,8 @@
                     }
                 } else {
                     breakdown.push('Роль Шериф (-3)');
-                    // Проверяем раннюю смерть (1D, 2D, 1N)
-                    if (player.death_time === '1D' || player.death_time === '2D' || player.death_time === '1N') {
+                    // Проверяем раннюю смерть (только 1D или 2D - голосование города)
+                    if (player.death_time === '1D' || player.death_time === '2D') {
                         breakdown.push('Убит в 1-2 день (-1)');
                     }
                 }
@@ -441,7 +441,7 @@
 
                 html += `
                     <div class="game-card">
-                        <div class="game-title">🎮 Игра номер ${game.game_number}</div>
+                        <div class="game-title">🎮 Игра № ${game.game_number}</div>
                         <div class="game-info">
                             <div class="info-item">
                                 <div class="info-label">Победитель</div>

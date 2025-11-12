@@ -127,35 +127,30 @@
             }
         }
 
-        .sort-controls {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-
-        .sort-btn {
-            padding: 10px 20px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 10px;
-            color: white;
+        .rating-table th.sortable {
             cursor: pointer;
+            user-select: none;
+            position: relative;
             transition: all 0.3s;
-            font-size: 0.95rem;
-            font-weight: 500;
         }
 
-        .sort-btn:hover {
+        .rating-table th.sortable:hover {
             background: rgba(255, 255, 255, 0.2);
-            border-color: rgba(255, 255, 255, 0.5);
         }
 
-        .sort-btn.active {
-            background: rgba(251, 191, 36, 0.3);
-            border-color: #fbbf24;
+        .rating-table th.sortable.active {
             color: #fbbf24;
+        }
+
+        .rating-table th.sortable::after {
+            content: '';
+            margin-left: 5px;
+            opacity: 0.3;
+        }
+
+        .rating-table th.sortable.active::after {
+            opacity: 1;
+            content: '▼';
         }
     </style>
 </head>
@@ -164,13 +159,6 @@
         <div class="header">
             <h1>🏆 Рейтинг игроков</h1>
             <p>MafClub.biz</p>
-        </div>
-
-        <div class="sort-controls" id="sortControls" style="display: none;">
-            <button class="sort-btn active" onclick="sortBy('points')">По очкам</button>
-            <button class="sort-btn" onclick="sortBy('games')">По играм</button>
-            <button class="sort-btn" onclick="sortBy('average')">По среднему баллу</button>
-            <button class="sort-btn" onclick="sortBy('wins')">По победам</button>
         </div>
 
         <div id="content">
@@ -205,8 +193,6 @@
                 // API возвращает {success: true, players: [...]}
                 if (data.success && data.players) {
                     allPlayers = data.players;
-                    // Показываем кнопки сортировки
-                    document.getElementById('sortControls').style.display = 'flex';
                     displayRating();
                 } else {
                     throw new Error('Неверный формат данных от API');
@@ -223,13 +209,6 @@
 
         function sortBy(criteria) {
             currentSortBy = criteria;
-
-            // Обновляем активную кнопку
-            document.querySelectorAll('.sort-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
-
             displayRating();
         }
 
@@ -268,10 +247,10 @@
                         <tr>
                             <th>Место</th>
                             <th>Игрок</th>
-                            <th>Игр</th>
-                            <th>Очки</th>
-                            <th>Среднее</th>
-                            <th>Побед</th>
+                            <th class="sortable ${currentSortBy === 'games' ? 'active' : ''}" onclick="sortBy('games')">Игр</th>
+                            <th class="sortable ${currentSortBy === 'points' ? 'active' : ''}" onclick="sortBy('points')">Очки</th>
+                            <th class="sortable ${currentSortBy === 'average' ? 'active' : ''}" onclick="sortBy('average')">Среднее</th>
+                            <th class="sortable ${currentSortBy === 'wins' ? 'active' : ''}" onclick="sortBy('wins')">Побед</th>
                         </tr>
                     </thead>
                     <tbody>
