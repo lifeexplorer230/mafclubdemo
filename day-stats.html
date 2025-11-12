@@ -338,29 +338,20 @@
                             </div>
                         </div>
 
-                        ${day.top_players && day.top_players.length > 0 ? `
+                        ${day.best_player ? `
                             <div class="top-players">
-                                <div class="top-players-title">🏆 Топ-3 игрока дня</div>
-                                ${day.top_players.map((player, index) => {
-                                    const medals = ['🥇', '🥈', '🥉'];
-                                    const rankClass = `rank-${index + 1}`;
-                                    return `
-                                        <div class="player-rank ${rankClass}">
-                                            <div class="player-rank-number">${medals[index]}</div>
-                                            <div class="player-rank-info">
-                                                <div class="player-rank-name">
-                                                    <a href="player.html?id=${player.id}">${player.name}</a>
-                                                </div>
-                                                <div class="player-rank-stats">
-                                                    Средний балл: <strong>${player.avg_points}</strong> |
-                                                    Очков: ${player.total_points} |
-                                                    Побед: ${player.wins} |
-                                                    Игр: ${player.games_played}
-                                                </div>
-                                            </div>
+                                <div class="top-players-title">🏆 Лучший игрок дня</div>
+                                <div class="player-rank rank-1">
+                                    <div class="player-rank-number">🥇</div>
+                                    <div class="player-rank-info">
+                                        <div class="player-rank-name">${day.best_player.name}</div>
+                                        <div class="player-rank-stats">
+                                            Средний балл: <strong>${day.best_player.avg_points}</strong> |
+                                            Очков: ${day.best_player.total_points} |
+                                            Игр: ${day.best_player.games_played}
                                         </div>
-                                    `;
-                                }).join('')}
+                                    </div>
+                                </div>
                             </div>
                         ` : '<div class="no-data">Нет данных о лучших игроках (нужно минимум 3 игры)</div>'}
                     </div>
