@@ -216,10 +216,25 @@
                     <tbody>
             `;
 
+            // Добавляем ранг к каждому игроку
+            let rank = 1;
+            rating.forEach((player, index) => {
+                player.rank = rank;
+                // Если следующий игрок имеет другие очки, увеличиваем ранг
+                if (index < rating.length - 1 && rating[index + 1].total_points !== player.total_points) {
+                    rank = index + 2;
+                }
+            });
+
             rating.forEach(player => {
                 const rankClass = player.rank <= 3 ? `rank-${player.rank}` : '';
                 const pointsClass = player.total_points > 0 ? 'points-positive' :
                                    player.total_points < 0 ? 'points-negative' : '';
+
+                // Вычисляем средний балл
+                const avgPoints = player.games_played > 0
+                    ? (player.total_points / player.games_played).toFixed(2)
+                    : '0.00';
 
                 html += `
                     <tr onclick="openPlayer(${player.id})">
@@ -227,7 +242,7 @@
                         <td class="player-name">${player.name}</td>
                         <td>${player.games_played}</td>
                         <td class="${pointsClass}">${player.total_points > 0 ? '+' : ''}${player.total_points}</td>
-                        <td>${player.avg_points.toFixed(2)}</td>
+                        <td>${avgPoints}</td>
                         <td>${player.wins}</td>
                     </tr>
                 `;
@@ -250,7 +265,7 @@
     </script>
 
     <a href="login.html" style="position: fixed; bottom: 10px; right: 10px; opacity: 0.5; font-size: 0.75rem; background: rgba(0,0,0,0.3); padding: 5px 10px; border-radius: 5px; text-decoration: none; color: white; transition: opacity 0.3s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='0.5'">
-        v1.1.0
+        v1.1.1
     </a>
 </body>
 </html>
