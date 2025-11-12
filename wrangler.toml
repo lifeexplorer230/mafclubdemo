@@ -1,6 +1,10 @@
 name = "mafclubdemo"
 compatibility_date = "2025-11-05"
 
+# Статические файлы (HTML, JS, CSS)
+[assets]
+directory = "."
+
 # D1 База данных
 [[d1_databases]]
 binding = "DB"
