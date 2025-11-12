@@ -1,0 +1,35 @@
+[
+  {
+    "results": [
+      {
+        "sql": "CREATE TABLE game_results (\n    id INTEGER PRIMARY KEY AUTOINCREMENT,\n    game_id INTEGER NOT NULL,\n    player_id INTEGER NOT NULL,\n    role TEXT NOT NULL,\n    death_time TEXT,\n    is_alive INTEGER DEFAULT 0,\n    points INTEGER NOT NULL,\n    black_checks INTEGER DEFAULT 0,\n    red_checks INTEGER DEFAULT 0,\n    achievements TEXT,\n    created_at TEXT DEFAULT (datetime('now')),\n    FOREIGN KEY (game_id) REFERENCES games(id),\n    FOREIGN KEY (player_id) REFERENCES players(id)\n)"
+      },
+      {
+        "sql": "CREATE TABLE game_sessions (\n    id INTEGER PRIMARY KEY AUTOINCREMENT,\n    date TEXT NOT NULL,\n    total_games INTEGER NOT NULL,\n    created_at TEXT DEFAULT (datetime('now'))\n)"
+      },
+      {
+        "sql": "CREATE TABLE games (\n    id INTEGER PRIMARY KEY AUTOINCREMENT,\n    session_id INTEGER NOT NULL,\n    game_number INTEGER NOT NULL,\n    winner TEXT NOT NULL,\n    is_clean_win INTEGER DEFAULT 0,\n    is_dry_win INTEGER DEFAULT 0,\n    created_at TEXT DEFAULT (datetime('now')),\n    FOREIGN KEY (session_id) REFERENCES game_sessions(id)\n)"
+      },
+      {
+        "sql": "CREATE TABLE players (\n    id INTEGER PRIMARY KEY AUTOINCREMENT,\n    name TEXT UNIQUE NOT NULL,\n    created_at TEXT DEFAULT (datetime('now'))\n)"
+      }
+    ],
+    "success": true,
+    "meta": {
+      "served_by": "v3-prod",
+      "served_by_region": "EEUR",
+      "served_by_primary": true,
+      "timings": {
+        "sql_duration_ms": 0.2135
+      },
+      "duration": 0.2135,
+      "changes": 0,
+      "last_row_id": 0,
+      "changed_db": false,
+      "size_after": 57344,
+      "rows_read": 14,
+      "rows_written": 0,
+      "total_attempts": 1
+    }
+  }
+]

@@ -1,14 +1,13 @@
--- Схема базы данных для Cloudflare D1
--- Создаётся командой: wrangler d1 execute mafia-rating --file=schema.sql
+-- MafClub.biz Database Schema
 
--- Таблица игроков
+-- Players table
 CREATE TABLE IF NOT EXISTS players (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT UNIQUE NOT NULL,
+    name TEXT NOT NULL UNIQUE,
     created_at TEXT DEFAULT (datetime('now'))
 );
 
--- Таблица игровых сессий (игровых дней)
+-- Game sessions table
 CREATE TABLE IF NOT EXISTS game_sessions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     date TEXT NOT NULL,
@@ -16,7 +15,7 @@ CREATE TABLE IF NOT EXISTS game_sessions (
     created_at TEXT DEFAULT (datetime('now'))
 );
 
--- Таблица игр
+-- Games table
 CREATE TABLE IF NOT EXISTS games (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     session_id INTEGER NOT NULL,
@@ -28,7 +27,7 @@ CREATE TABLE IF NOT EXISTS games (
     FOREIGN KEY (session_id) REFERENCES game_sessions(id)
 );
 
--- Таблица результатов игроков в играх
+-- Game results table
 CREATE TABLE IF NOT EXISTS game_results (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     game_id INTEGER NOT NULL,
@@ -45,7 +44,9 @@ CREATE TABLE IF NOT EXISTS game_results (
     FOREIGN KEY (player_id) REFERENCES players(id)
 );
 
--- Индексы для оптимизации
-CREATE INDEX IF NOT EXISTS idx_game_results_player ON game_results(player_id);
-CREATE INDEX IF NOT EXISTS idx_game_results_game ON game_results(game_id);
+-- Indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_games_session ON games(session_id);
+CREATE INDEX IF NOT EXISTS idx_games_number ON games(game_number);
+CREATE INDEX IF NOT EXISTS idx_game_results_game ON game_results(game_id);
+CREATE INDEX IF NOT EXISTS idx_game_results_player ON game_results(player_id);
+CREATE INDEX IF NOT EXISTS idx_game_sessions_date ON game_sessions(date);

@@ -1,0 +1,26 @@
+-- Players data
+INSERT INTO players (id, name, created_at) VALUES (1, 'Ирина П.','2025-11-12 10:35:01');
+INSERT INTO players (id, name, created_at) VALUES (2, 'Murka','2025-11-12 10:35:02');
+INSERT INTO players (id, name, created_at) VALUES (3, 'Наталья К.','2025-11-12 10:35:02');
+INSERT INTO players (id, name, created_at) VALUES (4, 'Александр Ю.','2025-11-12 10:35:02');
+INSERT INTO players (id, name, created_at) VALUES (5, 'Jordan','2025-11-12 10:35:02');
+INSERT INTO players (id, name, created_at) VALUES (6, 'Александр Б.','2025-11-12 10:35:03');
+INSERT INTO players (id, name, created_at) VALUES (7, 'Core','2025-11-12 10:35:03');
+INSERT INTO players (id, name, created_at) VALUES (8, 'Timtim','2025-11-12 10:35:03');
+INSERT INTO players (id, name, created_at) VALUES (9, 'Tukin','2025-11-12 10:35:03');
+INSERT INTO players (id, name, created_at) VALUES (10, 'Сергей К.','2025-11-12 10:35:04');
+INSERT INTO players (id, name, created_at) VALUES (11, 'Network','2025-11-12 10:50:07');
+INSERT INTO players (id, name, created_at) VALUES (12, 'Рита','2025-11-12 10:50:08');
+INSERT INTO players (id, name, created_at) VALUES (13, 'Интуиция','2025-11-12 10:52:37');
+INSERT INTO players (id, name, created_at) VALUES (14, 'Владимир С.','2025-11-12 10:52:37');
+INSERT INTO players (id, name, created_at) VALUES (15, 'NLP','2025-11-12 10:52:38');
+INSERT INTO players (id, name, created_at) VALUES (16, 'Руслан','2025-11-12 10:52:38');
+INSERT INTO players (id, name, created_at) VALUES (17, 'Гуломджон','2025-11-12 12:13:15');
+INSERT INTO players (id, name, created_at) VALUES (18, 'Grow','2025-11-12 12:13:16');
+INSERT INTO players (id, name, created_at) VALUES (19, 'Надежда','2025-11-12 12:13:16');
+INSERT INTO players (id, name, created_at) VALUES (20, 'Ольга В.','2025-11-12 12:13:16');
+INSERT INTO players (id, name, created_at) VALUES (21, 'Мэйбл','2025-11-12 12:13:17');
+INSERT INTO players (id, name, created_at) VALUES (22, 'Мария','2025-11-12 12:13:17');
+INSERT INTO players (id, name, created_at) VALUES (23, 'Алексей К.','2025-11-12 12:17:33');
+INSERT INTO players (id, name, created_at) VALUES (24, 'Диля','2025-11-12 12:20:49');
+INSERT INTO players (id, name, created_at) VALUES (25, 'Hevens','2025-11-12 12:20:49');
