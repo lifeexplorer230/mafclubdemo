@@ -42,7 +42,7 @@ export default async function handler(request, response) {
     for (const day of result.rows) {
       console.log('Finding best player for session:', day.session_id, 'date:', day.date);
 
-      const bestPlayerQuery = await db.execute({
+      const topPlayersQuery = await db.execute({
         sql: `
           SELECT
             p.id,
@@ -57,26 +57,27 @@ export default async function handler(request, response) {
           GROUP BY p.id, p.name
           HAVING games_played >= 3
           ORDER BY avg_points DESC
-          LIMIT 1
+          LIMIT 3
         `,
         args: [day.session_id]
       });
 
-      console.log('Best player query result:', bestPlayerQuery.rows);
+      console.log('Top players query result:', topPlayersQuery.rows);
 
-      const bestPlayer = bestPlayerQuery.rows.length > 0 ? {
-        name: bestPlayerQuery.rows[0].name,
-        total_points: bestPlayerQuery.rows[0].total_points,
-        games_played: bestPlayerQuery.rows[0].games_played,
-        avg_points: bestPlayerQuery.rows[0].avg_points ? parseFloat(bestPlayerQuery.rows[0].avg_points.toFixed(2)) : 0
-      } : null;
+      const topPlayers = topPlayersQuery.rows.map(row => ({
+        id: row.id,
+        name: row.name,
+        total_points: row.total_points,
+        games_played: row.games_played,
+        avg_points: row.avg_points ? parseFloat(row.avg_points.toFixed(2)) : 0
+      }));
 
       daysWithBestPlayers.push({
         date: day.date,
         total_games: day.total_games,
         total_players: day.total_players,
         total_points: day.total_points,
-        best_player: bestPlayer
+        top_players: topPlayers
       });
     }
 
