@@ -29,24 +29,24 @@ export default async function handler(request, response) {
 
   try {
     // Маршрутизация
-    if (path === '/api/rating' && method === 'GET') {
+    if (path === '/rating' && method === 'GET') {
       return await getRating(db, response);
     }
 
-    if (path.startsWith('/api/players/') && method === 'GET') {
-      const playerId = path.split('/')[3];
+    if (path.startsWith('/players/') && method === 'GET') {
+      const playerId = path.split('/')[2];
       return await getPlayer(db, response, playerId);
     }
 
-    if (path === '/api/players-list' && method === 'GET') {
+    if (path === '/players-list' && method === 'GET') {
       return await getPlayersList(db, response);
     }
 
-    if (path === '/api/day-stats' && method === 'GET') {
+    if (path === '/day-stats' && method === 'GET') {
       return await getDayStats(db, response);
     }
 
-    if (path === '/api/day-games' && method === 'GET') {
+    if (path === '/day-games' && method === 'GET') {
       const date = query.date;
       if (!date) {
         return response.status(400).json({ error: 'Date parameter required' });
@@ -54,21 +54,21 @@ export default async function handler(request, response) {
       return await getDayGames(db, response, date);
     }
 
-    if (path === '/api/all-games' && method === 'GET') {
+    if (path === '/all-games' && method === 'GET') {
       return await getAllGames(db, response);
     }
 
-    if (path.startsWith('/api/games/') && method === 'GET') {
-      const gameId = path.split('/')[3];
+    if (path.startsWith('/games/') && method === 'GET') {
+      const gameId = path.split('/')[2];
       return await getGameDetails(db, response, gameId);
     }
 
-    if (path.startsWith('/api/games/') && method === 'DELETE') {
-      const gameId = path.split('/')[3];
+    if (path.startsWith('/games/') && method === 'DELETE') {
+      const gameId = path.split('/')[2];
       return await deleteGame(db, request, response, gameId);
     }
 
-    if (path === '/api/sessions' && method === 'POST') {
+    if (path === '/sessions' && method === 'POST') {
       return await saveSession(db, request, response);
     }
 
