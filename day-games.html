@@ -369,10 +369,10 @@
                     5: 'Пятая', 6: 'Шестая', 7: 'Седьмая', 8: 'Восьмая',
                     9: 'Девятая', 10: 'Десятая'
                 };
-                return `${nightWords[number] || number} ночь`;
+                return `❌ ${nightWords[number] || number} ночь`;
             }
 
-            return `${numberWords[number] || number} день`;
+            return `❌ ${numberWords[number] || number} день`;
         }
 
         async function loadDayGames() {
@@ -441,7 +441,7 @@
 
                 html += `
                     <div class="game-card">
-                        <div class="game-title">🎮 Игра #${game.game_number}</div>
+                        <div class="game-title">🎮 Игра номер ${game.game_number}</div>
                         <div class="game-info">
                             <div class="info-item">
                                 <div class="info-label">Победитель</div>

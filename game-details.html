@@ -416,10 +416,10 @@
                     9: 'Девятая',
                     10: 'Десятая'
                 };
-                return `${nightWords[number] || number} ${typeWord}`;
+                return `❌ ${nightWords[number] || number} ${typeWord}`;
             }
 
-            return `${numberWord} ${typeWord}`;
+            return `❌ ${numberWord} ${typeWord}`;
         }
 
         function displayGameDetails(data) {
@@ -438,7 +438,7 @@
 
             let html = `
                 <div class="game-header">
-                    <div class="game-title">🎮 Игра #${game.game_number}</div>
+                    <div class="game-title">🎮 Игра номер ${game.game_number}</div>
                     <div class="game-info">
                         <div class="info-item">
                             <div class="info-label">Дата</div>
