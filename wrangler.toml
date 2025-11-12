@@ -1,10 +1,9 @@
 name = "mafclubdemo"
-main = "worker.js"
 compatibility_date = "2025-11-05"
 
 # Статические файлы (HTML, JS, CSS)
-[site]
-bucket = "."
+[assets]
+directory = "."
 
 # D1 База данных
 [[d1_databases]]
