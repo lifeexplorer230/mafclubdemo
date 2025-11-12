@@ -274,6 +274,76 @@
     </div>
 
     <script>
+        function getPointsBreakdown(player, game) {
+            const breakdown = [];
+            const role = player.role;
+            const isWin = (game.winner === 'Мирные' && (role === 'Мирный' || role === 'Шериф')) ||
+                          (game.winner === 'Мафия' && (role === 'Мафия' || role === 'Дон'));
+            const isAlive = player.is_alive === 1;
+
+            // Базовые очки за роль и победу/поражение
+            if (role === 'Мирный') {
+                if (isWin) {
+                    breakdown.push('Победа мирных (+4)');
+                }
+            } else if (role === 'Мафия') {
+                if (isWin) {
+                    breakdown.push('Победа мафии (+5)');
+                }
+            } else if (role === 'Дон') {
+                if (isWin) {
+                    breakdown.push('Победа мафии (+5)');
+                    breakdown.push('Роль Дон (+3)');
+                    if (isAlive) {
+                        breakdown.push('Не покидал стола (+1)');
+                    }
+                } else {
+                    breakdown.push('Роль Дон (-3)');
+                }
+            } else if (role === 'Шериф') {
+                if (isWin) {
+                    breakdown.push('Победа мирных (+4)');
+                    breakdown.push('Роль Шериф (+3)');
+                    if (isAlive) {
+                        breakdown.push('Не покидал стола (+2)');
+                    }
+                } else {
+                    breakdown.push('Роль Шериф (-3)');
+                    // Проверяем раннюю смерть (1D, 2D, 1N)
+                    if (player.death_time === '1D' || player.death_time === '2D' || player.death_time === '1N') {
+                        breakdown.push('Убит в 1-2 день (-1)');
+                    }
+                }
+            }
+
+            // Бонусы за специальные условия
+            if (game.is_clean_win && (role === 'Мирный' || role === 'Шериф')) {
+                breakdown.push('Чистая победа (+1)');
+            }
+
+            if (game.is_dry_win && (role === 'Мафия' || role === 'Дон')) {
+                breakdown.push('Победа в сухую (+1)');
+            }
+
+            // Проверяем угадайку в достижениях
+            if (player.achievements && player.achievements.includes('Угадайка')) {
+                if (role === 'Мирный') {
+                    breakdown.push('Угадайка (+2)');
+                } else if (role === 'Мафия' || role === 'Дон') {
+                    breakdown.push('Угадайка (+3)');
+                } else if (role === 'Шериф') {
+                    breakdown.push('Угадайка (+2)');
+                }
+            }
+
+            // 3 черные проверки для шерифа
+            if (role === 'Шериф' && player.black_checks >= 3) {
+                breakdown.push('3 черные проверки (+3)');
+            }
+
+            return breakdown;
+        }
+
         function formatDeathTime(deathTime) {
             if (deathTime === '0') {
                 return '✅ Живой';
@@ -391,7 +461,7 @@
                                     <th>Роль</th>
                                     <th>Убит</th>
                                     <th>Очки</th>
-                                    <th>Достижения</th>
+                                    <th>Расшифровка</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -408,15 +478,17 @@
 
                     const deathText = formatDeathTime(player.death_time);
 
-                    let achievementsHtml = '';
-                    if (player.achievements && player.achievements.length > 0) {
-                        achievementsHtml = '<ul class="achievements-list">';
-                        player.achievements.forEach(ach => {
-                            achievementsHtml += `<li>${ach}</li>`;
+                    // Получаем расшифровку очков
+                    const breakdown = getPointsBreakdown(player, game);
+                    let breakdownHtml = '';
+                    if (breakdown.length > 0) {
+                        breakdownHtml = '<ul class="achievements-list">';
+                        breakdown.forEach(item => {
+                            breakdownHtml += `<li>${item}</li>`;
                         });
-                        achievementsHtml += '</ul>';
+                        breakdownHtml += '</ul>';
                     } else {
-                        achievementsHtml = '<span style="opacity: 0.5;">—</span>';
+                        breakdownHtml = '<span style="opacity: 0.5;">—</span>';
                     }
 
                     html += `
@@ -425,7 +497,7 @@
                             <td><span class="role-badge ${roleClass}">${player.role}</span></td>
                             <td class="death-time">${deathText}</td>
                             <td class="${pointsClass}">${player.points > 0 ? '+' : ''}${player.points}</td>
-                            <td>${achievementsHtml}</td>
+                            <td>${breakdownHtml}</td>
                         </tr>
                     `;
                 });
