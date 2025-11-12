@@ -416,7 +416,7 @@
 
                     html += `
                         <tr>
-                            <td class="hide-mobile"><a href="day-stats.html" class="clickable-link">${dateFormatted}</a></td>
+                            <td class="hide-mobile"><a href="day-games.html?date=${game.date}" class="clickable-link">${dateFormatted}</a></td>
                             <td><a href="game-details.html?id=${game.game_id}" class="clickable-link">#${game.game_number || 1}</a></td>
                             <td>${game.role}</td>
                             <td class="hide-mobile">${game.winner === 'Мирные' ? '🏡' : '🔫'} ${game.winner}</td>
