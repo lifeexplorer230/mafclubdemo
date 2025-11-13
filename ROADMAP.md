@@ -1049,3 +1049,87 @@ git branch -a  # Проверить текущие ветки
   ```
 
 ---
+
+2025-01-13 | Исправление vercel.json для static файлов | ✅ ЗАВЕРШЕНО | 15 минут |
+
+  Что сделано:
+
+  **Проблема:**
+  - После деплоя staging все страницы возвращали 404
+  - Production также не работал (404 на всех HTML страницах)
+  - Причина: vercel.json был настроен только для API endpoints
+
+  **Диагностика:**
+  - Проверен текущий vercel.json:
+    ```json
+    {
+      "builds": [{ "src": "api/**/*.js", "use": "@vercel/node" }],
+      "routes": [{ "src": "/api/(.*)", "dest": "/api/$1" }, { "handle": "filesystem" }]
+    }
+    ```
+  - Конфигурация деплоила только API, игнорируя HTML файлы
+  - Static файлы не попадали в deployment bundle
+
+  **Решение:**
+  - Упростил vercel.json до минимума:
+    ```json
+    {
+      "version": 2,
+      "name": "mafclubscore",
+      "github": {
+        "enabled": true,
+        "silent": false
+      }
+    }
+    ```
+  - Позволяю Vercel автоматически определять:
+    * Static site (HTML/CSS/JS файлы)
+    * Serverless functions (api/*.js)
+  - Zero-config подход Vercel
+
+  **Технические детали:**
+  - Коммит: fcf6031 "fix: Simplify vercel.json to enable static file deployment"
+  - Запушен в staging ветку
+  - Vercel автоматически создал новый деплой (10 минут назад)
+  - Deployment Protection включен на всех окружениях (требуется SSO)
+
+  **Проверка после деплоя:**
+  - Staging URL: https://mafclubscore-g3gspfvvw-lifeexplorers-projects.vercel.app
+  - Status: 401 (Vercel Deployment Protection - это нормально)
+  - Production также защищён SSO (корпоративный аккаунт)
+
+  Выводы:
+  - vercel.json был перенастроен слишком сложно
+  - Zero-config подход Vercel лучше для simple static + serverless
+  - Deployment Protection - это feature безопасности, не баг
+  - Требуется ручное тестирование через браузер с авторизацией
+
+  Проблемы:
+  - Невозможно автоматически протестировать из-за SSO защиты
+  - Нужен bypass token или ручная авторизация в браузере
+
+  Следующие шаги:
+  - ✅ Конфигурация исправлена и задеплоена
+  - ⏳ Ручное тестирование staging через браузер (24-48 часов):
+    * Проверить rating.html открывается
+    * Проверить API endpoints работают с Turso
+    * Попробовать XSS атаку: `<script>alert("XSS")</script>`
+    * Тест CORS с разрешенного/неразрешенного домена
+    * Мониторинг Vercel логов на ошибки
+  - После успешного тестирования: PR staging → main
+  - РУЧНОЙ deploy на production
+
+  Команды для проверки (требуется авторизация):
+  ```bash
+  # Получить список деплоев
+  vercel list --token <TOKEN>
+
+  # Последний деплой (10 минут назад):
+  # https://mafclubscore-g3gspfvvw-lifeexplorers-projects.vercel.app
+
+  # Проверить статус (требуется bypass token для автотестов)
+  curl https://mafclubscore-g3gspfvvw-lifeexplorers-projects.vercel.app/
+  # 401 - требуется SSO авторизация
+  ```
+
+---
