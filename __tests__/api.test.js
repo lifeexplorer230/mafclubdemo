@@ -1,7 +1,7 @@
 import { jest } from '@jest/globals';
 
 // Мокаем @libsql/client
-jest.mock('@libsql/client/web', () => ({
+jest.mock('@libsql/client', () => ({
   createClient: jest.fn(() => ({
     execute: jest.fn()
   }))
@@ -11,7 +11,7 @@ describe('API Эндпоинты', () => {
 
   describe('GET /api/rating', () => {
     test('Должен вернуть список игроков с рейтингом', async () => {
-      const { createClient } = await import('@libsql/client/web');
+      const { createClient } = await import('@libsql/client');
       const mockExecute = jest.fn().mockResolvedValue({
         rows: [
           { id: 1, name: 'Игрок1', games_played: 10, total_points: 25, wins: 5 },
@@ -50,7 +50,7 @@ describe('API Эндпоинты', () => {
     });
 
     test('Должен обработать ошибку базы данных', async () => {
-      const { createClient } = await import('@libsql/client/web');
+      const { createClient } = await import('@libsql/client');
       const mockExecute = jest.fn().mockRejectedValue(new Error('Database error'));
 
       createClient.mockReturnValue({ execute: mockExecute });
@@ -76,7 +76,7 @@ describe('API Эндпоинты', () => {
 
   describe('GET /api/players/[id]', () => {
     test('Должен вернуть данные конкретного игрока', async () => {
-      const { createClient } = await import('@libsql/client/web');
+      const { createClient } = await import('@libsql/client');
 
       const mockExecute = jest.fn()
         .mockResolvedValueOnce({
@@ -140,7 +140,7 @@ describe('API Эндпоинты', () => {
     });
 
     test('Должен вернуть 404 если игрок не найден', async () => {
-      const { createClient } = await import('@libsql/client/web');
+      const { createClient } = await import('@libsql/client');
       const mockExecute = jest.fn().mockResolvedValue({ rows: [] });
 
       createClient.mockReturnValue({ execute: mockExecute });
@@ -166,7 +166,7 @@ describe('API Эндпоинты', () => {
 
   describe('GET /api/day-stats', () => {
     test('Должен вернуть статистику по дням с топ-3 игроками', async () => {
-      const { createClient } = await import('@libsql/client/web');
+      const { createClient } = await import('@libsql/client');
 
       const mockExecute = jest.fn()
         .mockResolvedValueOnce({
@@ -219,7 +219,7 @@ describe('API Эндпоинты', () => {
 
   describe('GET /api/games/[id]', () => {
     test('Должен вернуть детали игры', async () => {
-      const { createClient } = await import('@libsql/client/web');
+      const { createClient } = await import('@libsql/client');
 
       const mockExecute = jest.fn()
         .mockResolvedValueOnce({
@@ -276,7 +276,7 @@ describe('API Эндпоинты', () => {
     });
 
     test('DELETE должен удалить игру (с авторизацией)', async () => {
-      const { createClient } = await import('@libsql/client/web');
+      const { createClient } = await import('@libsql/client');
 
       const mockExecute = jest.fn()
         .mockResolvedValueOnce({
@@ -334,7 +334,7 @@ describe('API Эндпоинты', () => {
 
   describe('GET /api/all-games', () => {
     test('Должен вернуть список всех игр', async () => {
-      const { createClient } = await import('@libsql/client/web');
+      const { createClient } = await import('@libsql/client');
 
       const mockExecute = jest.fn().mockResolvedValue({
         rows: [
