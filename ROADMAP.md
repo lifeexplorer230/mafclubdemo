@@ -1073,3 +1073,313 @@ git checkout -b feature/xss-protection
   - Фаза 1.4: Remove hardcoded credentials (users таблица, bcrypt)
 
 ---
+
+2025-01-13 (вечер) | Фаза 1.3 завершена + Обнаружена критическая проблема CORS | 🔄 В ПРОЦЕССЕ | 2 часа |
+
+  Что сделано:
+
+  **✅ Фаза 1.3 - Input Validation (ЗАВЕРШЕНА):**
+  - Запущен агент для автоматизации через Task tool
+  - ✅ Установлен Zod (npm install zod)
+  - ✅ Создана ветка `feature/input-validation` от `develop`
+  - ✅ Создан файл `api/validators/game-validator.js` с полной валидацией:
+    * Валидация даты (YYYY-MM-DD)
+    * Валидация ролей ("Мирный", "Шериф", "Мафия", "Дон")
+    * Валидация death_time ("Night 0-4", "Day 1-4", "Final", null)
+    * Валидация структуры игры (ровно 10 игроков)
+    * Валидация победителя ("Мирные" или "Мафия")
+  - ✅ Обновлён `api/[...path].js` - добавлена валидация в saveSession()
+  - ✅ Создан файл тестов `__tests__/game-validator.test.js` (8 тестов)
+  - ✅ Все тесты проходят: 49/49 (включая 8 новых)
+  - ✅ Создан PR #5: https://github.com/lifeexplorer230/mafclubscore/pull/5
+  - ✅ Изменения: +329 строк, -3 строки
+
+  **🔴 КРИТИЧЕСКАЯ ПРОБЛЕМА обнаружена:**
+  - Запущен агент для проверки production безопасности
+  - Обнаружено: CORS всё ещё возвращает `Access-Control-Allow-Origin: *`
+  - Причина: `vercel.json` НЕ содержит настройки headers
+  - Несмотря на hotfix v1.1.1, старые CORS заголовки остались
+  - Также отсутствуют security headers (X-Frame-Options, X-Content-Type-Options, Referrer-Policy)
+  - Результаты test-security.js: 13/18 прошло (5 тестов провалились из-за отсутствия headers)
+
+  **🔄 В процессе (агенты работают):**
+  - Агент 1: Исправление CORS через vercel.json (запущен)
+  - Агент 2: Фаза 1.4 - Remove hardcoded credentials (ждёт уточнения)
+
+  Проблемы и решения:
+  - ПРОБЛЕМА: Jest не находил новые тесты
+  - РЕШЕНИЕ: Добавлен game-validator.test.js в jest.config.js
+  - ПРОБЛЕМА: Ошибка "Cannot read properties of undefined (reading 'map')"
+  - РЕШЕНИЕ: В Zod 4.x используется error.issues вместо error.errors
+  - ПРОБЛЕМА: CORS wildcard на production после v1.1.1
+  - ПРИЧИНА: vercel.json не настроен для CORS headers
+  - РЕШЕНИЕ: Нужен hotfix v1.1.2 с правильным vercel.json
+
+  Следующий шаг (ДЛЯ ЗАВТРА):
+  1. **КРИТИЧНО:** Завершить hotfix v1.1.2 (исправить CORS в vercel.json)
+  2. Merge PR #5 (Input Validation) в develop
+  3. Deploy на staging для тестирования валидации
+  4. Продолжить Фазу 1.4 (Remove hardcoded credentials)
+  5. После тестирования - merge в main
+
+  Текущие открытые задачи:
+  - [ ] Hotfix v1.1.2: добавить CORS и security headers в vercel.json
+  - [ ] Merge PR #5 в develop
+  - [ ] Deploy и тестирование на staging (24 часа)
+  - [ ] Завершить Фазу 1.4 (инфраструктура для credentials)
+
+---
+
+## 🎯 КАК ПРОДОЛЖИТЬ ЗАВТРА (2025-01-14)
+
+### Шаг 1: Проверить статус агентов (если они ещё работают)
+
+```bash
+cd /root/mafclubscore
+git status
+```
+
+Проверить:
+- Есть ли незакоммиченные изменения от агентов?
+- Какая ветка активна?
+
+### Шаг 2: КРИТИЧНО - Завершить hotfix v1.1.2
+
+**Проблема:** Production CORS всё ещё `*` (не ограничен)
+
+**Решение:**
+1. Проверить `/root/mafclubscore/vercel.json`
+2. Добавить секцию headers (если её нет):
+
+```json
+{
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "https://score.mafclub.biz"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, POST, PUT, DELETE, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type, Authorization"
+        },
+        {
+          "key": "Access-Control-Allow-Credentials",
+          "value": "true"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        }
+      ]
+    }
+  ]
+}
+```
+
+3. Commit и deploy:
+```bash
+git add vercel.json
+git commit -m "fix: Add CORS and security headers in vercel.json (v1.1.2)
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>"
+
+git push origin main
+
+# Deploy
+VERCEL_TOKEN="IP0NEKMD42KfjW5JXijJCCyX" vercel deploy --prod --token IP0NEKMD42KfjW5JXijJCCyX --yes
+```
+
+4. Проверить:
+```bash
+curl -I "https://score.mafclub.biz/api/rating" -H "Origin: https://example.com" | grep access-control
+# Должен НЕ вернуть Access-Control-Allow-Origin (или вернуть error)
+
+curl -I "https://score.mafclub.biz/api/rating" -H "Origin: https://score.mafclub.biz" | grep access-control
+# Должен вернуть: Access-Control-Allow-Origin: https://score.mafclub.biz
+```
+
+5. Обновить VERSION.md (v1.1.2)
+
+### Шаг 3: Merge PR #5 (Input Validation)
+
+**Что делать:**
+
+```bash
+cd /root/mafclubscore
+git checkout develop
+git pull origin develop
+
+# Merge PR #5
+gh pr merge 5 --merge
+
+# Или через web: https://github.com/lifeexplorer230/mafclubscore/pull/5
+```
+
+### Шаг 4: Deploy на staging
+
+```bash
+git checkout staging
+git merge develop
+git push origin staging
+
+# Vercel автоматически задеплоит
+# Подожди 2-3 минуты
+```
+
+Проверить staging URL (будет показан в Vercel Dashboard)
+
+### Шаг 5: Тестирование валидации на staging
+
+**Тест 1: Валидные данные проходят**
+```bash
+curl -X POST https://staging-url.vercel.app/api/sessions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "date": "2025-01-14",
+    "games": [{
+      "winner": "Мирные",
+      "is_clean_win": false,
+      "is_dry_win": false,
+      "results": [...]
+    }]
+  }'
+# Должен вернуть 200
+```
+
+**Тест 2: Невалидная дата отклоняется**
+```bash
+curl -X POST https://staging-url.vercel.app/api/sessions \
+  -H "Content-Type: application/json" \
+  -d '{"date": "invalid", "games": []}'
+# Должен вернуть 400 с описанием ошибок
+```
+
+**Тест 3: Невалидная роль отклоняется**
+Попробовать отправить игру с ролью "Mafia" (на английском) - должно отклониться
+
+### Шаг 6: Продолжить Фазу 1.4 (Remove hardcoded credentials)
+
+**Что делать:**
+
+```bash
+git checkout develop
+git checkout -b feature/remove-hardcoded-creds
+
+# Создать файлы
+mkdir -p migrations scripts
+
+# 1. Создать .env.example
+cat > .env.example << 'EOF'
+TURSO_DATABASE_URL=your_database_url
+TURSO_AUTH_TOKEN=your_auth_token
+ADMIN_AUTH_TOKEN=your_admin_token_here
+EOF
+
+# 2. Создать миграцию
+cat > migrations/001_create_users.sql << 'EOF'
+CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL UNIQUE,
+    password_hash TEXT NOT NULL,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+EOF
+
+# 3. Создать скрипт хэширования
+cat > scripts/hash-password.js << 'EOF'
+import bcrypt from 'bcrypt';
+
+const password = process.argv[2];
+if (!password) {
+  console.error('Usage: node hash-password.js <password>');
+  process.exit(1);
+}
+
+const hash = await bcrypt.hash(password, 10);
+console.log('Password hash:', hash);
+EOF
+
+# 4. Установить bcrypt
+npm install bcrypt
+
+# 5. Найти все hardcoded credentials
+grep -r "egor_admin" . --exclude-dir=node_modules --exclude-dir=.git
+grep -r "Bearer egor_admin" . --exclude-dir=node_modules --exclude-dir=.git
+grep -r "unnatov14" . --exclude-dir=node_modules --exclude-dir=.git
+
+# 6. Заменить в api/[...path].js
+# Найти строку: if (!authHeader || authHeader !== 'Bearer egor_admin')
+# Заменить на: if (!authHeader || authHeader !== `Bearer ${process.env.ADMIN_AUTH_TOKEN}`)
+
+# 7. Commit и PR
+git add .
+git commit -m "feat: Add infrastructure for removing hardcoded credentials
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>"
+
+git push origin feature/remove-hardcoded-creds
+gh pr create --base develop --title "Phase 1.4: Infrastructure for removing hardcoded credentials"
+```
+
+---
+
+## 📊 ИТОГОВЫЙ СТАТУС НА КОНЕЦ ДНЯ
+
+### ✅ Что завершено:
+
+1. **v1.1.0** - XSS и CORS Protection (deployed)
+2. **v1.1.1** - Hotfix удаление старых Cloudflare Workers файлов (deployed)
+3. **Фаза 1.3** - Input Validation с Zod (PR #5 готов к merge)
+4. **ROADMAP.md** обновлён с записями в журнале
+
+### 🔄 Что в процессе:
+
+1. **Hotfix v1.1.2** - Исправление CORS через vercel.json (КРИТИЧНО!)
+2. **Фаза 1.4** - Инфраструктура для удаления credentials (начато)
+
+### ⏳ Что нужно сделать завтра:
+
+1. ✅ Завершить hotfix v1.1.2 (vercel.json)
+2. ✅ Merge PR #5 в develop
+3. ✅ Deploy на staging
+4. ✅ Тестирование валидации (24 часа)
+5. ✅ Завершить Фазу 1.4
+
+### 📈 Прогресс по фазам:
+
+- **Фаза 0 (Инфраструктура):** ✅ 100% завершено
+- **Фаза 1.1 (XSS):** ✅ 100% завершено
+- **Фаза 1.2 (CORS):** 🔴 90% (hotfix v1.1.2 нужен!)
+- **Фаза 1.3 (Validation):** ✅ 100% (ждёт тестирования)
+- **Фаза 1.4 (Credentials):** 🔄 20% (инфраструктура)
+- **Фаза 1.5 (JWT):** ⏳ 0%
+
+### 🔥 Критические проблемы:
+
+1. **CORS wildcard на production** - требует hotfix v1.1.2
+2. **Отсутствуют security headers** - X-Frame-Options, X-Content-Type-Options
+
+### 📝 Открытые PR:
+
+- **PR #5:** Input Validation (готов к merge)
+
+---
