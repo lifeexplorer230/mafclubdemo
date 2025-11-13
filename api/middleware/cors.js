@@ -30,6 +30,10 @@ export function setCorsHeaders(request, response) {
     if (ALLOWED_ORIGINS.includes(origin)) {
         response.setHeader('Access-Control-Allow-Origin', origin);
         response.setHeader('Access-Control-Allow-Credentials', 'true');
+    } else if (origin && origin.includes('.vercel.app')) {
+        // Разрешаем все Vercel preview deployments (staging, PR previews)
+        response.setHeader('Access-Control-Allow-Origin', origin);
+        response.setHeader('Access-Control-Allow-Credentials', 'true');
     } else if (process.env.NODE_ENV === 'development') {
         // В dev режиме разрешаем любой localhost
         if (origin && origin.includes('localhost')) {
@@ -61,6 +65,9 @@ export function isOriginAllowed(origin) {
 
     // Проверка по списку
     if (ALLOWED_ORIGINS.includes(origin)) return true;
+
+    // Разрешаем все Vercel preview deployments
+    if (origin.includes('.vercel.app')) return true;
 
     // В dev режиме разрешаем localhost
     if (process.env.NODE_ENV === 'development' && origin.includes('localhost')) {
