@@ -1,7 +1,7 @@
 // Vercel Serverless Function для MafClub.biz API
 // Использует Turso (SQLite) вместо Cloudflare D1
 
-import { createClient } from '@libsql/client/web';
+import { createClient } from '@libsql/client';
 import { corsMiddleware } from './middleware/cors.js';
 
 // Инициализация Turso клиента
