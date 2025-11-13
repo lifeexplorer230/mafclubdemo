@@ -235,9 +235,9 @@ console.log(FeatureFlags.getAllFlags());
 - [x] Написать тесты для `dom-safe.js`
 - [x] Запустить все тесты локально: `npm test`
 - [x] Push → PR: `feature/xss-protection` → `develop` (PR #1)
-- [ ] Дождаться прохождения CI/CD
-- [ ] Code review (если есть кто)
-- [ ] Merge в `develop`
+- [x] Дождаться прохождения CI/CD (все проверки прошли ✅)
+- [x] Code review (если есть кто)
+- [x] Merge в `develop` (завершено ✅)
 - [ ] PR: `develop` → `staging`
 - [ ] Deploy на staging (автоматически)
 - [ ] Добавить в Vercel staging: `FEATURE_XSS_PROTECTION=true`
