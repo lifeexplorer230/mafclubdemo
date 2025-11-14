@@ -1,5 +1,5 @@
 import { describe, test, expect } from '@jest/globals';
-import { validateGameSession } from '../api/validators/game-validator.js';
+import { validateGameSession } from '../shared/validators/game-validator.js';
 
 describe('Game Validator', () => {
   // Валидные тестовые данные

@@ -1560,6 +1560,12 @@ gh pr create --base develop --title "Phase 1.4: Infrastructure for removing hard
 ## CHANGELOG
 
 
+### v1.7.1 (2025-11-14)
+**Тип**: Patch
+**Изменения**: fix: Move middleware and validators to shared/ to fix Vercel function limit (12 max on Hobby plan)
+
+
+
 ### v1.7.0 (2025-11-14)
 **Тип**: Minor
 **Изменения**: feat: Phase 3.1 - Fixed N+1 query problems in day-games and games endpoints

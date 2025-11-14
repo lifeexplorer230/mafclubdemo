@@ -6,7 +6,7 @@
 
 import { getDB } from '../shared/database.js';
 import { handleError, sendSuccess, sendNotFound, parseAchievements } from '../shared/handlers.js';
-import { corsMiddleware } from './middleware/cors.js';
+import { corsMiddleware } from '../shared/middleware/cors.js';
 
 export default async function handler(request, response) {
   // CORS protection
