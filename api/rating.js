@@ -1,15 +1,21 @@
 /**
  * Rating API Endpoint
  * Phase 2.1: Refactored to use shared utilities
+ * Performance: Added caching (30 second TTL)
  */
 
 import { getDB } from '../shared/database.js';
 import { handleError, sendSuccess } from '../shared/handlers.js';
 import { corsMiddleware } from '../shared/middleware/cors.js';
+import { cacheMiddleware } from '../shared/cache.js';
 
 export default async function handler(request, response) {
   // CORS protection - only allow requests from allowed origins
   if (corsMiddleware(request, response)) return; // Preflight handled
+
+  // ✅ Performance: Cache for 30 seconds
+  const cached = cacheMiddleware(30)(request, response);
+  if (cached) return cached;
 
   try {
     const db = getDB();

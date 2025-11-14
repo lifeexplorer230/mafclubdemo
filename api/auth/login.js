@@ -3,17 +3,24 @@
  * Phase 1.5: JWT Authentication
  * Phase 2.1: Refactored to use shared database utilities
  * Phase 2.3: Using enhanced database helpers (findOne)
+ * Security: Rate limiting to prevent brute force attacks
  */
 
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { findOne } from '../../shared/database.js';
 import { handleError, sendUnauthorized, sendBadRequest, sendSuccess } from '../../shared/handlers.js';
+import { rateLimitMiddleware } from '../../shared/middleware/rate-limit.js';
 
 export default async function handler(request, response) {
   // Only POST allowed
   if (request.method !== 'POST') {
     return response.status(405).json({ error: 'Method not allowed' });
+  }
+
+  // ✅ Security: Rate limiting - 5 login attempts per minute per IP
+  if (rateLimitMiddleware({ maxRequests: 5, windowMs: 60000 })(request, response)) {
+    return; // Rate limit exceeded
   }
 
   try {
