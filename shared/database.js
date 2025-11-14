@@ -8,6 +8,51 @@
 
 import { createClient } from '@libsql/client';
 
+/**
+ * Список разрешённых имён таблиц
+ * SQL injection protection: whitelist approach
+ */
+const ALLOWED_TABLES = new Set([
+  'players',
+  'games',
+  'game_results',
+  'users'
+]);
+
+/**
+ * Валидирует имя таблицы
+ * @param {string} table - Имя таблицы
+ * @throws {Error} Если таблица не в whitelist
+ */
+function validateTableName(table) {
+  if (!ALLOWED_TABLES.has(table)) {
+    throw new Error(`Invalid table name: ${table}. Allowed tables: ${Array.from(ALLOWED_TABLES).join(', ')}`);
+  }
+}
+
+/**
+ * Валидирует имя колонки (alphanumeric + underscore)
+ * @param {string} column - Имя колонки
+ * @throws {Error} Если имя содержит недопустимые символы
+ */
+function validateColumnName(column) {
+  if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(column)) {
+    throw new Error(`Invalid column name: ${column}. Only alphanumeric and underscore allowed.`);
+  }
+}
+
+/**
+ * Валидирует ORDER BY выражение
+ * @param {string} orderBy - ORDER BY выражение (например: "name ASC" или "id DESC")
+ * @throws {Error} Если выражение содержит недопустимые символы
+ */
+function validateOrderBy(orderBy) {
+  // Разрешаем: column_name ASC/DESC, column_name1 ASC, column_name2 DESC
+  if (!/^[a-zA-Z_][a-zA-Z0-9_]*(\s+(ASC|DESC))?(\s*,\s*[a-zA-Z_][a-zA-Z0-9_]*(\s+(ASC|DESC))?)*$/i.test(orderBy)) {
+    throw new Error(`Invalid ORDER BY expression: ${orderBy}. Format: "column ASC" or "col1 DESC, col2 ASC"`);
+  }
+}
+
 // Connection pool для переиспользования соединений
 let dbInstance = null;
 
@@ -101,6 +146,14 @@ export async function select(table, options = {}) {
     offset = null
   } = options;
 
+  // ✅ SQL Injection Protection: Validate table name
+  validateTableName(table);
+
+  // ✅ SQL Injection Protection: Validate column names
+  if (columns[0] !== '*') {
+    columns.forEach(col => validateColumnName(col));
+  }
+
   // Формируем SELECT часть
   const columnsStr = columns.join(', ');
   let sql = `SELECT ${columnsStr} FROM ${table}`;
@@ -110,6 +163,9 @@ export async function select(table, options = {}) {
   const args = [];
 
   if (whereKeys.length > 0) {
+    // ✅ SQL Injection Protection: Validate WHERE column names
+    whereKeys.forEach(key => validateColumnName(key));
+
     const whereConditions = whereKeys.map(key => {
       args.push(where[key]);
       return `${key} = ?`;
@@ -119,6 +175,8 @@ export async function select(table, options = {}) {
 
   // ORDER BY
   if (orderBy) {
+    // ✅ SQL Injection Protection: Validate ORDER BY expression
+    validateOrderBy(orderBy);
     sql += ` ORDER BY ${orderBy}`;
   }
 
@@ -142,8 +200,14 @@ export async function select(table, options = {}) {
  * @returns {Promise<Object>} Результат с lastInsertRowid
  */
 export async function insert(table, data) {
+  // ✅ SQL Injection Protection: Validate table name
+  validateTableName(table);
+
   const columns = Object.keys(data);
   const values = Object.values(data);
+
+  // ✅ SQL Injection Protection: Validate column names
+  columns.forEach(col => validateColumnName(col));
 
   const placeholders = columns.map(() => '?').join(', ');
   const columnsStr = columns.join(', ');
@@ -166,12 +230,21 @@ export async function insert(table, data) {
  * @returns {Promise<Object>} Результат с rowsAffected
  */
 export async function update(table, data, where = {}) {
+  // ✅ SQL Injection Protection: Validate table name
+  validateTableName(table);
+
   const dataKeys = Object.keys(data);
   const whereKeys = Object.keys(where);
 
   if (whereKeys.length === 0) {
     throw new Error('UPDATE без WHERE условия запрещён (для безопасности)');
   }
+
+  // ✅ SQL Injection Protection: Validate column names in SET
+  dataKeys.forEach(key => validateColumnName(key));
+
+  // ✅ SQL Injection Protection: Validate column names in WHERE
+  whereKeys.forEach(key => validateColumnName(key));
 
   // SET часть
   const setConditions = dataKeys.map(key => `${key} = ?`);
@@ -196,11 +269,17 @@ export async function update(table, data, where = {}) {
  * @returns {Promise<Object>} Результат с rowsAffected
  */
 export async function deleteFrom(table, where = {}) {
+  // ✅ SQL Injection Protection: Validate table name
+  validateTableName(table);
+
   const whereKeys = Object.keys(where);
 
   if (whereKeys.length === 0) {
     throw new Error('DELETE без WHERE условия запрещён (для безопасности)');
   }
+
+  // ✅ SQL Injection Protection: Validate column names in WHERE
+  whereKeys.forEach(key => validateColumnName(key));
 
   const whereConditions = whereKeys.map(key => `${key} = ?`);
   const whereValues = Object.values(where);
@@ -219,12 +298,18 @@ export async function deleteFrom(table, where = {}) {
  * @returns {Promise<number>} Количество строк
  */
 export async function count(table, where = {}) {
+  // ✅ SQL Injection Protection: Validate table name
+  validateTableName(table);
+
   const whereKeys = Object.keys(where);
   const args = [];
 
   let sql = `SELECT COUNT(*) as count FROM ${table}`;
 
   if (whereKeys.length > 0) {
+    // ✅ SQL Injection Protection: Validate column names in WHERE
+    whereKeys.forEach(key => validateColumnName(key));
+
     const whereConditions = whereKeys.map(key => {
       args.push(where[key]);
       return `${key} = ?`;
