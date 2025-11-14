@@ -458,11 +458,21 @@
                     const pointsClass = game.points > 0 ? 'points-positive' :
                                        game.points < 0 ? 'points-negative' : '';
 
-                    const dateFormatted = new Date(game.date).toLocaleDateString('ru-RU');
+                    // Безопасная обработка даты
+                    let dateFormatted = 'Н/Д';
+                    let dateLink = '#';
+                    if (game.date) {
+                        try {
+                            dateFormatted = new Date(game.date).toLocaleDateString('ru-RU');
+                            dateLink = `day-games.html?date=${escapeHtml(game.date)}`;
+                        } catch (e) {
+                            console.warn('Invalid date:', game.date);
+                        }
+                    }
 
                     html += `
                         <tr>
-                            <td class="hide-mobile"><a href="day-games.html?date=${escapeHtml(game.date)}" class="clickable-link">${dateFormatted}</a></td>
+                            <td class="hide-mobile"><a href="${dateLink}" class="clickable-link">${dateFormatted}</a></td>
                             <td><a href="game-details.html?id=${game.game_id}" class="clickable-link">#${game.game_number || 1}</a></td>
                             <td>${escapeHtml(game.role)}</td>
                             <td class="hide-mobile">${game.winner === 'Мирные' ? '🏡' : '🔫'} ${escapeHtml(game.winner)}</td>

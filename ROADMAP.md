@@ -433,6 +433,12 @@ curl -I https://mafclubscore.vercel.app/api/rating \
 ## CHANGELOG
 
 
+### v1.7.3 (2025-11-14)
+**Тип**: Patch
+**Изменения**: fix: Add top-3 players to day-stats API and fix date handling in player.html
+
+
+
 ### v1.7.2 (2025-11-14)
 **Тип**: Patch
 **Изменения**: fix: Handle textContent as property in createElement() (Phase 0.1)
