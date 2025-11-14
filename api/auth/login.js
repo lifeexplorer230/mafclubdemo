@@ -2,11 +2,12 @@
  * JWT Authentication Login Endpoint
  * Phase 1.5: JWT Authentication
  * Phase 2.1: Refactored to use shared database utilities
+ * Phase 2.3: Using enhanced database helpers (findOne)
  */
 
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { getDB } from '../../shared/database.js';
+import { findOne } from '../../shared/database.js';
 import { handleError, sendUnauthorized, sendBadRequest, sendSuccess } from '../../shared/handlers.js';
 
 export default async function handler(request, response) {
@@ -23,18 +24,12 @@ export default async function handler(request, response) {
       return sendBadRequest(response, 'Username and password required');
     }
 
-    // Get user from database
-    const db = getDB();
-    const result = await db.execute({
-      sql: 'SELECT * FROM users WHERE username = ?',
-      args: [username]
-    });
+    // Get user from database using new helper
+    const user = await findOne('users', { username });
 
-    if (result.rows.length === 0) {
+    if (!user) {
       return sendUnauthorized(response, 'Invalid credentials');
     }
-
-    const user = result.rows[0];
 
     // Verify password
     const isValid = await bcrypt.compare(password, user.password_hash);

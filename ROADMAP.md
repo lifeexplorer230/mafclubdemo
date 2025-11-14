@@ -1555,6 +1555,12 @@ gh pr create --base develop --title "Phase 1.4: Infrastructure for removing hard
 ## CHANGELOG
 
 
+### v1.6.0 (2025-11-14)
+**Тип**: Minor
+**Изменения**: feat: Phase 2.3 - Database abstraction layer with query builders and connection pooling
+
+
+
 ### v1.5.0 (2025-11-14)
 **Тип**: Minor
 **Изменения**: feat: Phase 2.2 - Frontend modularization (API, UI, Auth modules)
