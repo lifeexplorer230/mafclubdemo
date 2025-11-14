@@ -436,11 +436,12 @@
         }
 
         function formatDeathTime(deathTime) {
-            if (deathTime === '0') {
+            // Безопасная проверка на undefined/null
+            if (!deathTime || deathTime === '0') {
                 return '✅ Живой';
             }
 
-            const match = deathTime.match(/^(\d+)([DN])$/);
+            const match = String(deathTime).match(/^(\d+)([DN])$/);
             if (!match) {
                 return deathTime;
             }

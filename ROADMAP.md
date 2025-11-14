@@ -433,6 +433,12 @@ curl -I https://mafclubscore.vercel.app/api/rating \
 ## CHANGELOG
 
 
+### v1.7.4 (2025-11-14)
+**Тип**: Patch
+**Изменения**: fix: Add null check for deathTime in day-games.html formatDeathTime()
+
+
+
 ### v1.7.3 (2025-11-14)
 **Тип**: Patch
 **Изменения**: fix: Add top-3 players to day-stats API and fix date handling in player.html
