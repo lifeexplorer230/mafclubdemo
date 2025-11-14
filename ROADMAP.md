@@ -386,7 +386,13 @@ feature/* → develop → staging → main → production
 - [ ] Penetration testing
 
 #### 3.2 Надёжность
-- [ ] Database backups (daily)
+- [x] Database backups (daily) ✅ v1.17.0
+  - [x] CLI tool для создания SQL dumps (scripts/backup-database.js)
+  - [x] Поддержка create, list, clean команд
+  - [x] Генерация SQL dumps со схемой и данными
+  - [x] Автоматическая retention policy (30 дней)
+  - [x] Documentation (docs/DATABASE_BACKUPS.md)
+  - [x] Примеры cron и GitHub Actions
 - [ ] Disaster recovery plan
 - [ ] Blue-green deployments
 - [x] Health checks улучшения ✅ v1.16.0
@@ -416,7 +422,14 @@ feature/* → develop → staging → main → production
 **Срок:** 1 месяц | **Приоритет:** НИЗКИЙ
 
 #### 4.1 Улучшения UX
-- [ ] Темная тема
+- [x] Темная тема ✅ v1.17.0
+  - [x] theme-switcher.js с light/dark/auto режимами
+  - [x] localStorage persistence
+  - [x] System theme detection (prefers-color-scheme)
+  - [x] Inline script для предотвращения flash
+  - [x] CSS variables для theming
+  - [x] Meta theme-color для mobile browsers
+  - [x] Documentation (docs/DARK_THEME.md)
 - [ ] Мобильное приложение (PWA)
 - [ ] Улучшенная навигация
 - [ ] Keyboard shortcuts
@@ -426,7 +439,14 @@ feature/* → develop → staging → main → production
 - [ ] Система достижений
 - [ ] Социальные функции
 - [ ] Email уведомления
-- [ ] Экспорт данных
+- [x] Экспорт данных ✅ v1.17.0
+  - [x] data-exporter.js с утилитами экспорта
+  - [x] Поддержка CSV, Excel CSV (с BOM), JSON, HTML форматов
+  - [x] Экспорт рейтинга и статистики игроков
+  - [x] UI кнопка с dropdown меню
+  - [x] Автоматическое экранирование и правильная кодировка
+  - [x] Download через Blob API
+  - [x] Documentation (docs/DATA_EXPORT.md)
 
 #### 4.3 Аналитика
 - [ ] Расширенная статистика
@@ -632,6 +652,12 @@ curl -I https://mafclubscore.vercel.app/api/rating \
 ---
 
 ## CHANGELOG
+
+
+### v1.17.0 (2025-11-14)
+**Тип**: Minor
+**Изменения**: Merge feature/data-export into main
+
 
 
 ### v1.16.0 (2025-11-14)
