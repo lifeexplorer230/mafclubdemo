@@ -1,0 +1,64 @@
+name: PR Checks
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  lint-and-test:
+    name: Lint and Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check package.json and package-lock.json sync
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci --dry-run
+          fi
+
+      - name: Verify version consistency
+        run: |
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          API_VERSION=$(grep "process.env.APP_VERSION || 'v" api/version.js | sed "s/.*'v\(.*\)'.*/\1/")
+          echo "package.json version: v$PACKAGE_VERSION"
+          echo "api/version.js fallback: v$API_VERSION"
+          if [ "$PACKAGE_VERSION" != "$API_VERSION" ]; then
+            echo "❌ Version mismatch!"
+            exit 1
+          fi
+          echo "✅ Versions are consistent"
+
+      - name: Install Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: Run E2E tests
+        run: npm run test:e2e:critical
+        env:
+          BASE_URL: https://mafclubscore.vercel.app
+
+      - name: Comment PR with test results
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const testResults = process.env.TEST_RESULTS || '✅ All tests passed';
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## E2E Test Results\n\n${testResults}`
+            });

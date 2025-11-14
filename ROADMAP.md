@@ -518,6 +518,12 @@ curl -I https://mafclubscore.vercel.app/api/rating \
 ## CHANGELOG
 
 
+### v1.12.0 (2025-11-14)
+**Тип**: Minor
+**Изменения**: feat: Add CI/CD workflows for E2E tests
+
+
+
 ### v1.11.0 (2025-11-14)
 **Тип**: Minor
 **Изменения**: feat: Add E2E tests for player.html (12 tests)
