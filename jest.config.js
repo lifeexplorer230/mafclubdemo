@@ -11,6 +11,9 @@ export default {
     "**/__tests__/**/game-validator.test.js",
     "**/__tests__/**/jwt-auth.test.js",
     "**/__tests__/**/utils.test.js",
+    "**/__tests__/**/validation.test.js",
+    "**/__tests__/**/cache.test.js",
+    "**/__tests__/**/rate-limit.test.js",
     "**/__tests__/modules/api.test.js",
     "**/__tests__/modules/auth.test.js"
     // TODO: Fix and re-enable rating_calculator.test.js and api.test.js
@@ -29,7 +32,7 @@ export default {
   ],
   coverageDirectory: "coverage",
   coverageReporters: ["text", "lcov", "html", "json-summary"],
-  coverageThresholds: {
+  coverageThreshold: {
     global: {
       branches: 50,
       functions: 50,
