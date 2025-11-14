@@ -1,380 +1,432 @@
 # 🚀 DEPLOYMENT GUIDE
 
-## 📋 Pre-Deployment Checklist
+Полное руководство по деплою проекта MafClubScore.
 
-### Обязательные проверки перед КАЖДЫМ деплоем
+**Версия:** 1.0
+**Обновлено:** 2025-11-14
 
+---
+
+## 📋 СОДЕРЖАНИЕ
+
+1. [Требования](#требования)
+2. [Первоначальная настройка](#первоначальная-настройка)
+3. [Деплой на Vercel](#деплой-на-vercel)
+4. [Настройка базы данных](#настройка-базы-данных)
+5. [Environment Variables](#environment-variables)
+6. [CI/CD Pipeline](#cicd-pipeline)
+7. [Rollback Strategy](#rollback-strategy)
+8. [Monitoring](#monitoring)
+
+---
+
+## ✅ ТРЕБОВАНИЯ
+
+### Локальная разработка
+- **Node.js:** >= 18.0.0
+- **npm:** >= 9.0.0
+- **Git:** >= 2.30.0
+
+### Аккаунты
+- ✅ GitHub аккаунт
+- ✅ Vercel аккаунт (Hobby или Pro)
+- ✅ Turso аккаунт (для БД)
+
+### Инструменты
 ```bash
-# ✅ 1. Все тесты проходят
-npm test
-npm run test:e2e:critical
+# Установить Vercel CLI
+npm install -g vercel
 
-# ✅ 2. Нет изменений в рабочей директории
-git status
-
-# ✅ 3. Версия обновлена
-node scripts/bump-version.js
-git add -A && git commit --amend --no-edit
-
-# ✅ 4. Проверка лимитов Vercel
-VERCEL_TOKEN="IP0NEKMD42KfjW5JXijJCCyX"
-vercel ls --token $VERCEL_TOKEN | head -5
-# Если видите много деплоев за сегодня - подумайте, стоит ли деплоить
-
-# ✅ 5. Environment variables актуальны
-vercel env ls --token $VERCEL_TOKEN
+# Проверить версию
+vercel --version
 ```
 
 ---
 
-## 🔄 Deployment Flow
+## 🔧 ПЕРВОНАЧАЛЬНАЯ НАСТРОЙКА
 
-### Уровень 1: Feature Development
+### 1. Клонирование репозитория
 
 ```bash
-# 1. Создать feature ветку
-git checkout develop
-git pull origin develop
-git checkout -b feature/my-feature
+git clone https://github.com/lifeexplorer230/mafclubscore.git
+cd mafclubscore
+```
 
-# 2. Разработка + тесты
-# ... код ...
-npm test
+### 2. Установка зависимостей
 
-# 3. Commit с правильным префиксом
-git add -A
-git commit -m "feat: Add new feature"  # для minor версии
-# или
-git commit -m "fix: Fix bug"           # для patch версии
+```bash
+npm install
+```
 
-# 4. Версионирование
-node scripts/bump-version.js
-git add -A && git commit --amend --no-edit
+### 3. Настройка окружения
 
-# 5. Push и PR
+Создать файл `.env.local`:
+```bash
+# Database (Turso)
+TURSO_DATABASE_URL=libsql://your-database.turso.io
+TURSO_AUTH_TOKEN=eyJhbGc...
+
+# App Version
+APP_VERSION=v1.13.0
+```
+
+### 4. Локальный запуск
+
+```bash
+# Development сервер
+npm run dev
+
+# Откроется на http://localhost:3000
+```
+
+---
+
+## ☁️ ДЕПЛОЙ НА VERCEL
+
+### Способ 1: Через Vercel Dashboard (рекомендуется для первого раза)
+
+1. **Авторизоваться на vercel.com**
+2. **Создать новый проект:**
+   - Import Git Repository
+   - Выбрать `lifeexplorer230/mafclubscore`
+3. **Настроить Environment Variables** (см. раздел ниже)
+4. **Deploy!**
+
+---
+
+### Способ 2: Через Vercel CLI
+
+#### Первый деплой
+
+```bash
+# 1. Авторизоваться
+vercel login
+
+# 2. Link проект
+vercel link
+
+# 3. Настроить environment variables
+vercel env add TURSO_DATABASE_URL production
+vercel env add TURSO_AUTH_TOKEN production
+vercel env add APP_VERSION production
+
+# 4. Деплой на production
+vercel --prod
+```
+
+#### Последующие деплои
+
+```bash
+# Production deploy
+vercel --prod
+
+# Preview deploy (автоматически для каждого push)
+vercel
+```
+
+---
+
+### Способ 3: Автоматический деплой через GitHub
+
+**Настроено по умолчанию!**
+
+```bash
+# Push в main → автоматический деплой на production
+git push origin main
+
+# Push в другие ветки → preview деплой
 git push origin feature/my-feature
-gh pr create --base develop --title "Feature: My feature"
-```
-
-### Уровень 2: Staging Deployment
-
-```bash
-# 1. Merge в develop (после review)
-git checkout develop
-git pull origin develop
-gh pr merge [PR-NUMBER] --merge
-
-# 2. Deploy на staging
-git checkout staging
-git merge develop
-git push origin staging
-
-# 3. Vercel автоматически создаст deployment
-# Ждите 2-3 минуты
-
-# 4. Проверка staging
-echo "Staging URL будет в Vercel Dashboard"
-echo "Или выполните:"
-vercel ls --token $VERCEL_TOKEN | grep staging | head -1
-```
-
-### Уровень 3: Production Deployment
-
-```bash
-# ⏰ ВАЖНО: Подождать 24-48 часов на staging!
-
-# 1. Проверить staging метрики
-echo "Checklist:"
-echo "[ ] Нет ошибок в Sentry за 24ч"
-echo "[ ] Все функции работают"
-echo "[ ] Performance метрики в норме"
-echo "[ ] Версия корректно отображается"
-
-# 2. Создать backup БД
-echo "Backup production database:"
-turso db shell mafia-rating --dump > backup_$(date +%Y%m%d_%H%M%S).sql
-
-# 3. Merge в main
-git checkout main
-git pull origin main
-git merge staging -m "chore: Deploy to production v$(node -p "require('./package.json').version")"
-git push origin main
-
-# 4. РУЧНОЙ production deploy
-vercel deploy --prod --token $VERCEL_TOKEN --yes
-
-# 5. Создать git tag
-VERSION=$(node -p "require('./package.json').version")
-git tag -a v$VERSION -m "Release v$VERSION"
-git push origin v$VERSION
 ```
 
 ---
 
-## 🛡️ Safe Deployment Strategies
+## 💾 НАСТРОЙКА БАЗЫ ДАННЫХ
 
-### Strategy 1: Feature Flags (Рекомендуется)
+### Turso Database Setup
 
-```javascript
-// 1. Добавить флаг в shared/feature-flags.js
-const FLAGS = {
-  MY_NEW_FEATURE: process.env.FEATURE_MY_NEW_FEATURE === 'true'
-};
-
-// 2. Использовать в коде
-if (FeatureFlags.isEnabled('MY_NEW_FEATURE')) {
-  // новый код
-} else {
-  // старый код
-}
-```
+#### 1. Создать аккаунт на turso.tech
 
 ```bash
-# 3. Deploy с выключенным флагом
-vercel deploy --prod --token $VERCEL_TOKEN
+# Установить Turso CLI
+curl -sSfL https://get.tur.so/install.sh | bash
 
-# 4. Включить для тестирования
-printf "true" | vercel env add FEATURE_MY_NEW_FEATURE production
-
-# 5. Если проблемы - быстро выключить
-printf "false" | vercel env add FEATURE_MY_NEW_FEATURE production
+# Авторизоваться
+turso auth login
 ```
 
-### Strategy 2: Canary Deployment
+#### 2. Создать базу данных
 
 ```bash
-# 1. Deploy на preview URL
-vercel --token $VERCEL_TOKEN
-# Получите preview URL
+# Создать новую БД
+turso db create mafclub-prod
 
-# 2. Тестировать на preview 24ч
+# Получить URL
+turso db show mafclub-prod
 
-# 3. Постепенный rollout
-# 10% трафика → 50% → 100%
+# Создать токен
+turso db tokens create mafclub-prod
 ```
 
-### Strategy 3: Blue-Green Deployment
+#### 3. Импортировать схему
 
 ```bash
-# 1. Deploy новой версии (Green)
-vercel deploy --token $VERCEL_TOKEN --name mafclubscore-green
+# Из файла schema.sql
+turso db shell mafclub-prod < schema.sql
+```
 
-# 2. Тестирование на Green
+#### 4. Проверка подключения
 
-# 3. Переключение трафика
-# В Vercel Dashboard: Domains → Update
+```bash
+# Проверить таблицы
+turso db shell mafclub-prod "SELECT name FROM sqlite_master WHERE type='table';"
 ```
 
 ---
 
-## 📊 Monitoring После Deployment
+## 🔐 ENVIRONMENT VARIABLES
 
-### Первые 15 минут (критично!)
+### Production Variables
+
+В Vercel Dashboard → Settings → Environment Variables:
+
+| Variable | Value | Environment |
+|----------|-------|-------------|
+| `TURSO_DATABASE_URL` | `libsql://xxx.turso.io` | Production |
+| `TURSO_AUTH_TOKEN` | `eyJhbGc...` | Production |
+| `APP_VERSION` | `v1.13.0` | Production |
+
+### Добавление через CLI
 
 ```bash
-# 1. Следить за логами в реальном времени
-vercel logs mafclubscore --follow --token $VERCEL_TOKEN
+# Production
+printf "libsql://..." | vercel env add TURSO_DATABASE_URL production
+printf "eyJ..." | vercel env add TURSO_AUTH_TOKEN production
+printf "v1.13.0" | vercel env add APP_VERSION production
 
-# 2. Проверить основные endpoints
-./test-api.sh  # см. TROUBLESHOOTING.md
+# Preview (optional)
+printf "libsql://..." | vercel env add TURSO_DATABASE_URL preview
 
-# 3. Мониторинг ошибок
-# Открыть Sentry Dashboard: https://sentry.io/
-
-# 4. Проверить метрики
-curl -w "\nTime: %{time_total}s\n" https://mafclubscore.vercel.app/api/rating
+# Development (optional)
+printf "libsql://..." | vercel env add TURSO_DATABASE_URL development
 ```
 
-### Первые 24 часа
+### Обновление переменных
 
-- [ ] Проверять Sentry каждые 2 часа
-- [ ] Мониторить response time
-- [ ] Следить за 5xx ошибками
-- [ ] Проверить feedback от пользователей
+```bash
+# 1. Удалить старую
+vercel env rm APP_VERSION production --yes
 
-### KPIs для мониторинга
+# 2. Добавить новую
+printf "v1.14.0" | vercel env add APP_VERSION production
 
-| Метрика | Норма | Тревога |
-|---------|-------|---------|
-| Response time | < 500ms | > 1s |
-| Error rate | < 0.1% | > 1% |
-| Uptime | > 99.9% | < 99% |
-| JS errors | < 5/hour | > 20/hour |
+# 3. Редеплой для применения
+vercel --prod
+```
 
 ---
 
-## 🔴 Emergency Procedures
+## 🔄 CI/CD PIPELINE
 
-### Hotfix Deployment
+### GitHub Actions Workflows
+
+**Автоматически запускаются при:**
+
+1. **Push в main/develop** → `e2e-tests.yml`
+   - Запуск E2E тестов
+   - Upload артефактов при ошибках
+
+2. **Pull Request в main** → `pr-checks.yml`
+   - Проверка версий
+   - Запуск тестов
+   - Комментарий с результатами
+
+3. **Push в любую ветку** → `test.yml`
+   - Unit тесты
+   - Lint проверка
+   - Security audit
+
+### Локальная проверка перед push
 
 ```bash
-# 1. Создать hotfix ветку от main
-git checkout main
-git pull origin main
-git checkout -b hotfix/critical-bug
+# Pre-commit hook автоматически проверяет:
+# 1. Синхронизацию версий (package.json ↔ api/version.js)
+# 2. Синтаксис JavaScript
+# 3. Lint-staged
 
-# 2. Исправить баг
-# ... fix ...
+# Запуск вручную:
+npm test                    # Unit тесты
+npm run test:e2e:critical  # E2E тесты
+```
 
-# 3. Быстрое тестирование
-npm test
+---
 
-# 4. Commit без версионирования (экстренно)
-git add -A
-git commit -m "hotfix: Critical bug in production"
+## ⏮️ ROLLBACK STRATEGY
 
-# 5. Прямой merge в main (skip staging)
-git checkout main
-git merge hotfix/critical-bug --no-ff
-git push origin main
+### Откат на предыдущую версию
 
-# 6. Deploy немедленно
-vercel deploy --prod --token $VERCEL_TOKEN --yes --force
+#### Способ 1: Через Vercel Dashboard
 
-# 7. Версионирование после стабилизации
-node scripts/bump-version.js
-git add -A && git commit -m "chore: Update version after hotfix"
+1. Перейти в Deployments
+2. Найти предыдущий успешный деплой
+3. Нажать "Promote to Production"
+
+#### Способ 2: Через CLI
+
+```bash
+# 1. Найти предыдущий deployment
+vercel ls
+
+# 2. Промотировать конкретный деплой
+vercel promote <deployment-url>
+```
+
+#### Способ 3: Git Revert
+
+```bash
+# 1. Откатить коммит
+git revert HEAD
+
+# 2. Push (автоматический деплой)
 git push origin main
 ```
 
-### Rollback Procedures
+---
+
+### Откат базы данных
+
+**⚠️ ВАЖНО:** Turso не поддерживает автоматические бэкапы на бесплатном плане!
+
+**Рекомендации:**
+1. Регулярно делать экспорт БД
+2. Хранить дампы в приватном репозитории
+3. Перед критическими изменениями — снапшот
 
 ```bash
-# Вариант 1: Через Vercel (быстрее всего)
-vercel ls --token $VERCEL_TOKEN  # найти предыдущий deployment
-vercel rollback [deployment-id] --token $VERCEL_TOKEN
+# Экспорт БД
+turso db shell mafclub-prod ".dump" > backup-$(date +%Y%m%d).sql
 
-# Вариант 2: Через Git revert
-git checkout main
-git revert HEAD --no-edit
-git push origin main
-vercel deploy --prod --token $VERCEL_TOKEN --yes
-
-# Вариант 3: Force deploy старой версии
-git checkout v1.6.0  # предыдущий стабильный tag
-vercel deploy --prod --token $VERCEL_TOKEN --yes --force
+# Восстановление
+turso db shell mafclub-prod < backup-20250114.sql
 ```
 
 ---
 
-## 🏷️ Versioning Guidelines
+## 📊 MONITORING
 
-### Semantic Versioning
-
-```
-MAJOR.MINOR.PATCH
-
-1.0.0 → 2.0.0  Breaking changes (major:, BREAKING:)
-1.0.0 → 1.1.0  New features (feat:, feature:)
-1.0.0 → 1.0.1  Bug fixes (fix:, chore:, docs:)
-```
-
-### Автоматическое версионирование
+### Health Check Endpoints
 
 ```bash
-# Автоматически определяет тип по коммиту
-node scripts/bump-version.js
+# Проверка версии
+curl https://mafclubscore.vercel.app/api/version
 
-# Или явно указать
-node scripts/bump-version.js patch   # 1.0.0 → 1.0.1
-node scripts/bump-version.js minor   # 1.0.0 → 1.1.0
-node scripts/bump-version.js major   # 1.0.0 → 2.0.0
+# Проверка БД
+curl https://mafclubscore.vercel.app/api/rating
+
+# Проверка авторизации
+curl -X POST https://mafclubscore.vercel.app/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"test","password":"test"}'
 ```
 
----
+### Vercel Logs
 
-## 🔒 Security Checklist
-
-Перед КАЖДЫМ production deployment:
-
-- [ ] Нет hardcoded credentials в коде
-- [ ] Все API endpoints защищены авторизацией
-- [ ] CORS настроен правильно (не wildcard)
-- [ ] Input validation работает
-- [ ] XSS protection включена
-- [ ] Environment variables проверены
-- [ ] Нет console.log с sensitive данными
-- [ ] Security headers настроены
-
----
-
-## 📝 Post-Deployment
-
-### После успешного deployment
-
-1. **Обновить документацию:**
 ```bash
-# 1. Обновить VERSION.md
-echo "### v$(node -p "require('./package.json').version") ($(date +%Y-%m-%d))" >> VERSION.md
-echo "- Deployment ID: [id-from-vercel]" >> VERSION.md
-echo "- Changes: [list-of-changes]" >> VERSION.md
+# Последние логи
+vercel logs
 
-# 2. Обновить ROADMAP.md журнал
-# Добавить запись о deployment
+# Логи за час
+vercel logs --since 1h
+
+# Логи конкретного деплоя
+vercel logs <deployment-url>
 ```
 
-2. **Уведомить команду:**
-```markdown
-Deployed v1.7.0 to production ✅
-- Feature: New rating system
-- Fix: CORS issues
-- Performance: 20% faster
-Monitoring: All green
-```
+### GitHub Actions Status
 
-3. **Создать GitHub Release:**
+Проверить статус тестов:
+- https://github.com/lifeexplorer230/mafclubscore/actions
+
+---
+
+## 🔥 PRODUCTION DEPLOYMENT CHECKLIST
+
+Перед каждым деплоем на production:
+
+- [ ] ✅ Все тесты проходят локально
+  ```bash
+  npm test
+  npm run test:e2e:critical
+  ```
+
+- [ ] ✅ Версия обновлена
+  ```bash
+  node scripts/bump-version.js
+  git add -A
+  git commit --amend --no-edit
+  ```
+
+- [ ] ✅ Pre-commit hooks прошли успешно
+
+- [ ] ✅ ROADMAP.md обновлён с changelog
+
+- [ ] ✅ Environment variables актуальные
+
+- [ ] ✅ БД миграции применены (если есть)
+
+- [ ] ✅ Есть план отката (известен последний стабильный деплой)
+
+---
+
+## 🚨 TROUBLESHOOTING
+
+### "Resource is limited - try again in X minutes"
+
+**Проблема:** Превышен лимит деплоев (100/день)
+
+**Решение:**
+- Подождать указанное время
+- Батчить изменения перед деплоем
+- Рассмотреть Vercel Pro план
+
+---
+
+### "Deployment failed"
+
+**Проверить:**
+1. Логи в Vercel Dashboard
+2. Environment variables установлены
+3. package.json корректен
+4. Нет синтаксических ошибок
+
 ```bash
-VERSION=$(node -p "require('./package.json').version")
-gh release create v$VERSION \
-  --title "Release v$VERSION" \
-  --notes "See CHANGELOG in ROADMAP.md"
+# Проверка синтаксиса
+find . -name "*.js" -not -path "./node_modules/*" | xargs node --check
 ```
 
 ---
 
-## 🚫 Common Mistakes to Avoid
+### "Database connection failed"
 
-1. **НЕ деплоить в пятницу вечером**
-2. **НЕ пропускать staging период**
-3. **НЕ деплоить без тестов**
-4. **НЕ забывать про версионирование**
-5. **НЕ деплоить несколько features сразу**
-6. **НЕ игнорировать warnings в логах**
-7. **НЕ деплоить при высокой нагрузке**
+**Проверить:**
+1. TURSO_DATABASE_URL корректен
+2. TURSO_AUTH_TOKEN актуален
+3. БД существует и доступна
 
----
-
-## 📊 Deployment Metrics
-
-Отслеживать после каждого deployment:
-
-```javascript
-// deployment-metrics.js
-const metrics = {
-  deployment_time: Date.now(),
-  version: process.env.APP_VERSION,
-  build_time: process.env.VERCEL_BUILD_TIME,
-
-  // Добавить в API endpoint
-  performance: {
-    api_response_time: [], // собирать среднее
-    error_rate: 0,
-    uptime: 100
-  }
-};
+```bash
+# Тест подключения
+turso db shell mafclub-prod "SELECT 1;"
 ```
 
 ---
 
-## 🔗 Useful Links
+## 📞 SUPPORT
 
-- **Vercel Dashboard:** https://vercel.com/dashboard
-- **Deployment History:** `vercel ls --token $VERCEL_TOKEN`
-- **Environment Variables:** `vercel env ls --token $VERCEL_TOKEN`
-- **Logs:** `vercel logs mafclubscore --token $VERCEL_TOKEN`
-- **Domains:** `vercel domains ls --token $VERCEL_TOKEN`
+- **GitHub Issues:** https://github.com/lifeexplorer230/mafclubscore/issues
+- **Vercel Support:** https://vercel.com/support
+- **Turso Docs:** https://docs.turso.tech
 
 ---
 
-*Последнее обновление: 2025-11-14*
-*Следуйте этому guide для безопасных и предсказуемых deployments!*
+**Версия документа:** 1.0
+**Проект:** MafClubScore v1.13.0
+**Автор:** МАФ-Клуб SHOWTIME
