@@ -492,6 +492,12 @@ curl -I https://mafclubscore.vercel.app/api/rating \
 ## CHANGELOG
 
 
+### v1.10.0 (2025-11-14)
+**Тип**: Minor
+**Изменения**: feat: Add E2E tests for game-input.html (13 tests)
+
+
+
 ### v1.9.0 (2025-11-14)
 **Тип**: Minor
 **Изменения**: feat: Add E2E tests for login page (Phase 0.2)
