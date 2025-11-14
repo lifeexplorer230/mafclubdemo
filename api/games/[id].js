@@ -2,17 +2,27 @@
  * Game API Endpoint
  * Phase 2.1: Refactored to use shared utilities
  * Phase 3.1: Fixed N+1 query - using single JOIN instead of 2 queries
+ * Security: Input validation for game ID
  */
 
 import { getDB } from '../../shared/database.js';
-import { handleError, sendNotFound, sendSuccess, sendUnauthorized, parseAchievements } from '../../shared/handlers.js';
+import { handleError, sendNotFound, sendSuccess, sendUnauthorized, sendBadRequest, parseAchievements } from '../../shared/handlers.js';
 import { corsMiddleware } from '../../shared/middleware/cors.js';
+import { validateId } from '../../shared/validation.js';
 
 export default async function handler(request, response) {
   // CORS protection - only allow requests from allowed origins
   if (corsMiddleware(request, response)) return; // Preflight handled
 
-  const { id: gameId } = request.query;
+  const { id: rawGameId } = request.query;
+
+  // ✅ Security: Validate game ID
+  let gameId;
+  try {
+    gameId = validateId(rawGameId, 'Game ID');
+  } catch (error) {
+    return sendBadRequest(response, error.message);
+  }
 
   // Handle DELETE
   if (request.method === 'DELETE') {

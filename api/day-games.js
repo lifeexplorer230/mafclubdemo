@@ -2,20 +2,30 @@
  * Day Games API Endpoint
  * Phase 2.1: Refactored to use shared utilities
  * Phase 3.1: Fixed N+1 query problem with single JOIN query
+ * Security: Input validation for date parameter
  */
 
 import { getDB } from '../shared/database.js';
-import { handleError, sendSuccess, sendNotFound, parseAchievements } from '../shared/handlers.js';
+import { handleError, sendSuccess, sendNotFound, sendBadRequest, parseAchievements } from '../shared/handlers.js';
 import { corsMiddleware } from '../shared/middleware/cors.js';
+import { validateDate } from '../shared/validation.js';
 
 export default async function handler(request, response) {
   // CORS protection
   if (corsMiddleware(request, response)) return;
 
-  const { date } = request.query;
+  const { date: rawDate } = request.query;
 
-  if (!date) {
-    return response.status(400).json({ error: 'Date parameter required' });
+  if (!rawDate) {
+    return sendBadRequest(response, 'Date parameter required');
+  }
+
+  // ✅ Security: Validate date format
+  let date;
+  try {
+    date = validateDate(rawDate);
+  } catch (error) {
+    return sendBadRequest(response, error.message);
   }
 
   try {

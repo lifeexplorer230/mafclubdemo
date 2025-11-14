@@ -1,17 +1,27 @@
 /**
  * Player API Endpoint
  * Phase 2.1: Refactored to use shared utilities
+ * Security: Input validation for player ID
  */
 
 import { getDB } from '../../shared/database.js';
-import { handleError, sendNotFound, parseAchievements } from '../../shared/handlers.js';
+import { handleError, sendNotFound, parseAchievements, sendBadRequest } from '../../shared/handlers.js';
 import { corsMiddleware } from '../../shared/middleware/cors.js';
+import { validateId } from '../../shared/validation.js';
 
 export default async function handler(request, response) {
   // CORS protection - only allow requests from allowed origins
   if (corsMiddleware(request, response)) return; // Preflight handled
 
-  const { id: playerId } = request.query;
+  const { id: rawPlayerId } = request.query;
+
+  // ✅ Security: Validate player ID
+  let playerId;
+  try {
+    playerId = validateId(rawPlayerId, 'Player ID');
+  } catch (error) {
+    return sendBadRequest(response, error.message);
+  }
 
   try {
     const db = getDB();
