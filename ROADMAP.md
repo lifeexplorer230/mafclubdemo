@@ -1555,6 +1555,12 @@ gh pr create --base develop --title "Phase 1.4: Infrastructure for removing hard
 ## CHANGELOG
 
 
+### v1.5.0 (2025-11-14)
+**Тип**: Minor
+**Изменения**: feat: Phase 2.2 - Frontend modularization (API, UI, Auth modules)
+
+
+
 ### v1.4.0 (2025-11-14)
 **Тип**: Minor
 **Изменения**: refactor: Phase 2.1 - API code deduplication

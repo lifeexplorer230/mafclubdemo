@@ -227,51 +227,11 @@
 
     </div>
 
-    <script>
-        // ========== XSS PROTECTION ==========
-        // Безопасные функции для предотвращения XSS атак
-        function escapeHtml(text) {
-            const map = {
-                '&': '&amp;',
-                '<': '&lt;',
-                '>': '&gt;',
-                '"': '&quot;',
-                "'": '&#039;'
-            };
-            return String(text).replace(/[&<>"']/g, m => map[m]);
-        }
+    <script type="module">
+        // ========== IMPORTS ==========
+        import api from '/js/modules/api.js';
+        import { createElement, clearElement, showError } from '/js/modules/ui.js';
 
-        function createElement(tag, attributes = {}, children = []) {
-            const element = document.createElement(tag);
-
-            Object.entries(attributes).forEach(([key, value]) => {
-                if (key === 'textContent') {
-                    element.textContent = value;
-                } else if (key === 'className') {
-                    element.className = value;
-                } else if (key === 'onclick') {
-                    element.onclick = value;
-                } else {
-                    element.setAttribute(key, escapeHtml(value));
-                }
-            });
-
-            children.forEach(child => {
-                if (typeof child === 'string') {
-                    element.appendChild(document.createTextNode(child));
-                } else {
-                    element.appendChild(child);
-                }
-            });
-
-            return element;
-        }
-
-        function clearElement(element) {
-            while (element.firstChild) {
-                element.removeChild(element.firstChild);
-            }
-        }
         // ====================================
 
         let allPlayers = [];
@@ -279,14 +239,8 @@
 
         async function loadRating() {
             try {
-                // Загружаем из API
-                const response = await fetch('/api/rating');
-
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
-                }
-
-                const data = await response.json();
+                // Загружаем из API через модуль
+                const data = await api.getRating();
 
                 // API возвращает {success: true, players: [...]}
                 if (data.success && data.players) {
@@ -298,16 +252,8 @@
             } catch (error) {
                 console.error('Ошибка загрузки:', error);
 
-                // ✅ Безопасный рендеринг ошибки
-                const content = document.getElementById('content');
-                clearElement(content);
-
-                const errorDiv = createElement('div', { className: 'error' }, [
-                    '⚠️ Ошибка загрузки данных: ',
-                    error.message
-                ]);
-
-                content.appendChild(errorDiv);
+                // Используем утилиту showError из модуля ui.js
+                showError('#content', 'Ошибка загрузки данных', error.message);
             }
         }
 
