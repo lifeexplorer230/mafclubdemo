@@ -1,12 +1,11 @@
-import { createClient } from '@libsql/client';
-import { corsMiddleware } from '../middleware/cors.js';
+/**
+ * Game API Endpoint
+ * Phase 2.1: Refactored to use shared utilities
+ */
 
-function getDB() {
-  return createClient({
-    url: process.env.TURSO_DATABASE_URL,
-    authToken: process.env.TURSO_AUTH_TOKEN,
-  });
-}
+import { getDB } from '../../shared/database.js';
+import { handleError, sendNotFound, sendSuccess, sendUnauthorized, parseAchievements } from '../../shared/handlers.js';
+import { corsMiddleware } from '../middleware/cors.js';
 
 export default async function handler(request, response) {
   // CORS protection - only allow requests from allowed origins
@@ -17,8 +16,10 @@ export default async function handler(request, response) {
   // Handle DELETE
   if (request.method === 'DELETE') {
     const authHeader = request.headers.authorization;
-    if (!authHeader || authHeader !== 'Bearer egor_admin') {
-      return response.status(401).json({ error: 'Unauthorized' });
+    const expectedToken = `Bearer ${process.env.ADMIN_AUTH_TOKEN || 'egor_admin'}`;
+
+    if (!authHeader || authHeader !== expectedToken) {
+      return sendUnauthorized(response);
     }
 
     try {
@@ -30,7 +31,7 @@ export default async function handler(request, response) {
       });
 
       if (gameQuery.rows.length === 0) {
-        return response.status(404).json({ error: 'Game not found' });
+        return sendNotFound(response, 'Game not found');
       }
 
       const deletedGameNumber = gameQuery.rows[0].game_number;
@@ -45,17 +46,12 @@ export default async function handler(request, response) {
         args: [gameId]
       });
 
-      return response.status(200).json({
-        success: true,
+      return sendSuccess(response, {
         message: 'Game deleted successfully',
         deleted_game_number: deletedGameNumber
       });
     } catch (error) {
-      console.error('Delete Game API Error:', error);
-      return response.status(500).json({
-        error: 'Internal Server Error',
-        details: error.message
-      });
+      return handleError(response, error, 'Delete Game API Error');
     }
   }
 
@@ -74,7 +70,7 @@ export default async function handler(request, response) {
     });
 
     if (gameQuery.rows.length === 0) {
-      return response.status(404).json({ error: 'Game not found' });
+      return sendNotFound(response, 'Game not found');
     }
 
     const playersQuery = await db.execute({
@@ -92,19 +88,14 @@ export default async function handler(request, response) {
 
     const players = playersQuery.rows.map(row => ({
       ...row,
-      achievements: row.achievements ? JSON.parse(row.achievements) : []
+      achievements: parseAchievements(row.achievements)
     }));
 
-    return response.status(200).json({
-      success: true,
+    return sendSuccess(response, {
       game: gameQuery.rows[0],
       players: players
     });
   } catch (error) {
-    console.error('Game Details API Error:', error);
-    return response.status(500).json({
-      error: 'Internal Server Error',
-      details: error.message
-    });
+    return handleError(response, error, 'Game API Error');
   }
 }

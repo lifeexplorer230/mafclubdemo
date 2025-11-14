@@ -1,12 +1,11 @@
-import { createClient } from '@libsql/client';
-import { corsMiddleware } from './middleware/cors.js';
+/**
+ * Rating API Endpoint
+ * Phase 2.1: Refactored to use shared utilities
+ */
 
-function getDB() {
-  return createClient({
-    url: process.env.TURSO_DATABASE_URL,
-    authToken: process.env.TURSO_AUTH_TOKEN,
-  });
-}
+import { getDB } from '../shared/database.js';
+import { handleError, sendSuccess } from '../shared/handlers.js';
+import { corsMiddleware } from './middleware/cors.js';
 
 export default async function handler(request, response) {
   // CORS protection - only allow requests from allowed origins
@@ -36,15 +35,8 @@ export default async function handler(request, response) {
 
     const result = await db.execute(query);
 
-    return response.status(200).json({
-      success: true,
-      players: result.rows
-    });
+    return sendSuccess(response, { players: result.rows });
   } catch (error) {
-    console.error('Rating API Error:', error);
-    return response.status(500).json({
-      error: 'Internal Server Error',
-      details: error.message
-    });
+    return handleError(response, error, 'Rating API Error');
   }
 }

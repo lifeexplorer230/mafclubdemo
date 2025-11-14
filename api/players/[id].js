@@ -1,12 +1,11 @@
-import { createClient } from '@libsql/client';
-import { corsMiddleware } from '../middleware/cors.js';
+/**
+ * Player API Endpoint
+ * Phase 2.1: Refactored to use shared utilities
+ */
 
-function getDB() {
-  return createClient({
-    url: process.env.TURSO_DATABASE_URL,
-    authToken: process.env.TURSO_AUTH_TOKEN,
-  });
-}
+import { getDB } from '../../shared/database.js';
+import { handleError, sendNotFound, parseAchievements } from '../../shared/handlers.js';
+import { corsMiddleware } from '../middleware/cors.js';
 
 export default async function handler(request, response) {
   // CORS protection - only allow requests from allowed origins
@@ -32,7 +31,7 @@ export default async function handler(request, response) {
     });
 
     if (playerQuery.rows.length === 0) {
-      return response.status(404).json({ error: 'Player not found' });
+      return sendNotFound(response, 'Player not found');
     }
 
     const gamesQuery = await db.execute({
@@ -55,7 +54,7 @@ export default async function handler(request, response) {
 
     const games = gamesQuery.rows.map(row => ({
       ...row,
-      achievements: row.achievements ? JSON.parse(row.achievements) : []
+      achievements: parseAchievements(row.achievements)
     }));
 
     return response.status(200).json({
@@ -63,10 +62,6 @@ export default async function handler(request, response) {
       games: games
     });
   } catch (error) {
-    console.error('Player API Error:', error);
-    return response.status(500).json({
-      error: 'Internal Server Error',
-      details: error.message
-    });
+    return handleError(response, error, 'Player API Error');
   }
 }

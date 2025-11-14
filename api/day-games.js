@@ -1,16 +1,15 @@
-import { createClient } from '@libsql/client';
+/**
+ * Day Games API Endpoint
+ * Phase 2.1: Refactored to use shared utilities
+ */
+
+import { getDB } from '../shared/database.js';
+import { handleError, sendSuccess, sendNotFound, parseAchievements } from '../shared/handlers.js';
 import { corsMiddleware } from './middleware/cors.js';
 
-function getDB() {
-  return createClient({
-    url: process.env.TURSO_DATABASE_URL,
-    authToken: process.env.TURSO_AUTH_TOKEN,
-  });
-}
-
 export default async function handler(request, response) {
-  // CORS protection - only allow requests from allowed origins
-  if (corsMiddleware(request, response)) return; // Preflight handled
+  // CORS protection
+  if (corsMiddleware(request, response)) return;
 
   const { date } = request.query;
 
@@ -27,7 +26,7 @@ export default async function handler(request, response) {
     });
 
     if (sessionQuery.rows.length === 0) {
-      return response.status(404).json({ error: 'No games for this date' });
+      return sendNotFound(response, 'No games for this date');
     }
 
     const sessionId = sessionQuery.rows[0].id;
@@ -42,9 +41,7 @@ export default async function handler(request, response) {
     for (const game of gamesQuery.rows) {
       const playersQuery = await db.execute({
         sql: `
-          SELECT
-            gr.*,
-            p.name as player_name
+          SELECT gr.*, p.name as player_name
           FROM game_results gr
           JOIN players p ON gr.player_id = p.id
           WHERE gr.game_id = ?
@@ -55,7 +52,7 @@ export default async function handler(request, response) {
 
       const players = playersQuery.rows.map(row => ({
         ...row,
-        achievements: row.achievements ? JSON.parse(row.achievements) : []
+        achievements: parseAchievements(row.achievements)
       }));
 
       gamesWithPlayers.push({
@@ -64,16 +61,11 @@ export default async function handler(request, response) {
       });
     }
 
-    return response.status(200).json({
-      success: true,
+    return sendSuccess(response, {
       date: date,
       games: gamesWithPlayers
     });
   } catch (error) {
-    console.error('Day Games API Error:', error);
-    return response.status(500).json({
-      error: 'Internal Server Error',
-      details: error.message
-    });
+    return handleError(response, error, 'Day Games API Error');
   }
 }

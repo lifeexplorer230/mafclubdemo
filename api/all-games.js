@@ -1,42 +1,28 @@
-import { createClient } from '@libsql/client';
+/**
+ * All Games API Endpoint
+ * Phase 2.1: Refactored to use shared utilities
+ */
+
+import { getDB } from '../shared/database.js';
+import { handleError, sendSuccess } from '../shared/handlers.js';
 import { corsMiddleware } from './middleware/cors.js';
 
-function getDB() {
-  return createClient({
-    url: process.env.TURSO_DATABASE_URL,
-    authToken: process.env.TURSO_AUTH_TOKEN,
-  });
-}
-
 export default async function handler(request, response) {
-  // CORS protection - only allow requests from allowed origins
-  if (corsMiddleware(request, response)) return; // Preflight handled
+  // CORS protection
+  if (corsMiddleware(request, response)) return;
 
   try {
     const db = getDB();
 
-    const query = `
-      SELECT
-        g.id,
-        g.game_number,
-        g.winner,
-        gs.date
+    const result = await db.execute(`
+      SELECT g.id, g.game_number, gs.date, g.winner
       FROM games g
-      JOIN game_sessions gs ON g.session_id = gs.id
+      LEFT JOIN game_sessions gs ON g.session_id = gs.id
       ORDER BY g.game_number ASC
-    `;
+    `);
 
-    const result = await db.execute(query);
-
-    return response.status(200).json({
-      success: true,
-      games: result.rows
-    });
+    return sendSuccess(response, { games: result.rows });
   } catch (error) {
-    console.error('All Games API Error:', error);
-    return response.status(500).json({
-      error: 'Internal Server Error',
-      details: error.message
-    });
+    return handleError(response, error, 'All Games API Error');
   }
 }

@@ -1,22 +1,13 @@
 /**
  * JWT Authentication Login Endpoint
  * Phase 1.5: JWT Authentication
- *
- * POST /api/auth/login
- * Body: { username, password }
- * Returns: { success, user } + sets httpOnly cookie with JWT
+ * Phase 2.1: Refactored to use shared database utilities
  */
 
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { createClient } from '@libsql/client';
-
-function getDB() {
-  return createClient({
-    url: process.env.TURSO_DATABASE_URL,
-    authToken: process.env.TURSO_AUTH_TOKEN
-  });
-}
+import { getDB } from '../../shared/database.js';
+import { handleError, sendUnauthorized, sendBadRequest, sendSuccess } from '../../shared/handlers.js';
 
 export default async function handler(request, response) {
   // Only POST allowed
@@ -29,9 +20,7 @@ export default async function handler(request, response) {
 
     // Validate input
     if (!username || !password) {
-      return response.status(400).json({
-        error: 'Username and password required'
-      });
+      return sendBadRequest(response, 'Username and password required');
     }
 
     // Get user from database
@@ -42,9 +31,7 @@ export default async function handler(request, response) {
     });
 
     if (result.rows.length === 0) {
-      return response.status(401).json({
-        error: 'Invalid credentials'
-      });
+      return sendUnauthorized(response, 'Invalid credentials');
     }
 
     const user = result.rows[0];
@@ -53,9 +40,7 @@ export default async function handler(request, response) {
     const isValid = await bcrypt.compare(password, user.password_hash);
 
     if (!isValid) {
-      return response.status(401).json({
-        error: 'Invalid credentials'
-      });
+      return sendUnauthorized(response, 'Invalid credentials');
     }
 
     // Generate JWT
@@ -71,9 +56,6 @@ export default async function handler(request, response) {
     );
 
     // Set httpOnly cookie for security
-    // HttpOnly = защита от XSS
-    // Secure = только HTTPS (production)
-    // SameSite=Strict = защита от CSRF
     const isProduction = process.env.VERCEL_ENV === 'production';
     const cookieOptions = [
       `auth_token=${token}`,
@@ -86,8 +68,7 @@ export default async function handler(request, response) {
 
     response.setHeader('Set-Cookie', cookieOptions);
 
-    return response.status(200).json({
-      success: true,
+    return sendSuccess(response, {
       user: {
         id: user.id,
         username: user.username,
@@ -95,10 +76,6 @@ export default async function handler(request, response) {
       }
     });
   } catch (error) {
-    console.error('Login error:', error);
-    return response.status(500).json({
-      error: 'Internal server error',
-      details: error.message
-    });
+    return handleError(response, error, 'Login error');
   }
 }

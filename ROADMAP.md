@@ -1555,6 +1555,12 @@ gh pr create --base develop --title "Phase 1.4: Infrastructure for removing hard
 ## CHANGELOG
 
 
+### v1.4.0 (2025-11-14)
+**Тип**: Minor
+**Изменения**: refactor: Phase 2.1 - API code deduplication
+
+
+
 ### v1.3.2 (2025-11-14)
 **Тип**: Patch
 **Изменения**: docs: Update ROADMAP - Phase 1 complete, ready for Phase 2
