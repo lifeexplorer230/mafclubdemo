@@ -808,6 +808,12 @@ curl -I https://mafclubscore.vercel.app/api/rating \
 ## CHANGELOG
 
 
+### v1.17.2 (2025-11-14)
+**Тип**: Patch
+**Изменения**: feat(performance): Add caching and rate limiting
+
+
+
 ### v1.17.1 (2025-11-14)
 **Тип**: Patch
 **Изменения**: Merge branch 'fix/sql-injection'
