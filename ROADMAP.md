@@ -1551,3 +1551,11 @@ gh pr create --base develop --title "Phase 1.4: Infrastructure for removing hard
   - Удалить 'Egor': 'unnatov14' из кода
 
 ---
+
+
+## CHANGELOG
+
+### v1.0.8 (2025-11-14)
+**Тип**: Patch
+**Изменения**: fix: Correct version link and add auto-versioning system
+

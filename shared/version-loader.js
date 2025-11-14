@@ -69,7 +69,7 @@ async function getVersion() {
  */
 function createVersionElement(version) {
   const link = document.createElement('a');
-  link.href = 'rating.html';
+  link.href = 'login.html';
   link.textContent = version;
   link.style.cssText = `
     position: fixed;
