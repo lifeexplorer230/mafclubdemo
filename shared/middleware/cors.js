@@ -8,12 +8,14 @@
 const ALLOWED_ORIGINS = [
     'https://score.mafclub.biz',
     'https://www.mafclub.biz',
-    'https://mafclubscore.vercel.app', // Vercel production
-    'https://mafclub-score-production.up.railway.app', // Railway (если используется)
-    'http://localhost:3000', // Локальная разработка
-    'http://localhost:8000', // Локальная разработка
-    'http://127.0.0.1:3000', // Локальная разработка
-    'http://127.0.0.1:8000'  // Локальная разработка
+    'https://mafclubscore.vercel.app' // Vercel production
+];
+
+// Разрешённые паттерны для preview deployments (используем regex для безопасности)
+const ALLOWED_PREVIEW_PATTERNS = [
+    /^https:\/\/mafclubscore-[a-z0-9]+-lifeexplorers-projects\.vercel\.app$/, // Vercel preview deployments
+    /^https?:\/\/localhost:\d+$/, // Localhost для разработки
+    /^https?:\/\/127\.0\.0\.1:\d+$/ // 127.0.0.1 для разработки
 ];
 
 /**
@@ -26,20 +28,14 @@ const ALLOWED_ORIGINS = [
 export function setCorsHeaders(request, response) {
     const origin = request.headers.origin || request.headers.Origin;
 
-    // Проверить, разрешен ли origin
+    // ✅ Security: Strict origin validation
     if (ALLOWED_ORIGINS.includes(origin)) {
         response.setHeader('Access-Control-Allow-Origin', origin);
         response.setHeader('Access-Control-Allow-Credentials', 'true');
-    } else if (origin && origin.includes('.vercel.app')) {
-        // Разрешаем все Vercel preview deployments (staging, PR previews)
+    } else if (origin && isOriginMatchingPattern(origin)) {
+        // ✅ Security: Check against specific regex patterns
         response.setHeader('Access-Control-Allow-Origin', origin);
         response.setHeader('Access-Control-Allow-Credentials', 'true');
-    } else if (process.env.NODE_ENV === 'development') {
-        // В dev режиме разрешаем любой localhost
-        if (origin && origin.includes('localhost')) {
-            response.setHeader('Access-Control-Allow-Origin', origin);
-            response.setHeader('Access-Control-Allow-Credentials', 'true');
-        }
     }
 
     // Установить остальные CORS заголовки
@@ -57,22 +53,26 @@ export function setCorsHeaders(request, response) {
 }
 
 /**
+ * Проверяет соответствие origin разрешённым паттернам
+ * @param {string} origin - Origin для проверки
+ * @returns {boolean}
+ */
+function isOriginMatchingPattern(origin) {
+    return ALLOWED_PREVIEW_PATTERNS.some(pattern => pattern.test(origin));
+}
+
+/**
  * Проверяет разрешен ли origin
  * Используется для логирования и мониторинга
  */
 export function isOriginAllowed(origin) {
     if (!origin) return false;
 
-    // Проверка по списку
+    // ✅ Security: Check against whitelist first
     if (ALLOWED_ORIGINS.includes(origin)) return true;
 
-    // Разрешаем все Vercel preview deployments
-    if (origin.includes('.vercel.app')) return true;
-
-    // В dev режиме разрешаем localhost
-    if (process.env.NODE_ENV === 'development' && origin.includes('localhost')) {
-        return true;
-    }
+    // ✅ Security: Check against specific regex patterns
+    if (isOriginMatchingPattern(origin)) return true;
 
     return false;
 }
