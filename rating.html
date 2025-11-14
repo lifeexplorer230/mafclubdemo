@@ -199,6 +199,20 @@
             opacity: 1;
             content: '▼';
         }
+
+        /* Мобильные стили для переключения текст/эмодзи */
+        .show-mobile-only {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .hide-mobile-text {
+                display: none;
+            }
+            .show-mobile-only {
+                display: inline;
+            }
+        }
     </style>
 </head>
 <body>
@@ -217,7 +231,7 @@
         </nav>
 
         <div class="header">
-            <h1>🏆 Рейтинг игроков</h1>
+            <h1><img src="/images/mafclub-logo.jpg" alt="МАФ-Клуб" style="width: 40px; height: 40px; vertical-align: middle; border-radius: 50%; margin-right: 10px;"> Рейтинг игроков</h1>
             <p>MafClub.biz</p>
         </div>
 
@@ -337,7 +351,9 @@
             const headerRow = createElement('tr');
 
             // Заголовки колонок
-            headerRow.appendChild(createElement('th', { textContent: 'Место' }));
+            const placeHeader = createElement('th');
+            placeHeader.innerHTML = '<span class="hide-mobile-text">Место</span><span class="show-mobile-only">🏆</span>';
+            headerRow.appendChild(placeHeader);
             headerRow.appendChild(createElement('th', { textContent: 'Игрок' }));
 
             headerRow.appendChild(createElement('th', {

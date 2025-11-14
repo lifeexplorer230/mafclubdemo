@@ -305,6 +305,20 @@
                 padding: 10px;
             }
         }
+
+        /* Мобильные стили для переключения текст/логотип */
+        .show-mobile-only {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .hide-mobile-text {
+                display: none;
+            }
+            .show-mobile-only {
+                display: inline;
+            }
+        }
     </style>
 </head>
 <body>
@@ -551,7 +565,7 @@
                                         <th>Роль</th>
                                         <th>Убит</th>
                                         <th>Очки</th>
-                                        <th class="hide-mobile">Расшифровка</th>
+                                        <th class="hide-mobile"><span class="hide-mobile-text">Расшифровка</span><span class="show-mobile-only"><img src="/images/mafclub-logo.jpg" alt="МАФ" style="width: 24px; height: 24px; vertical-align: middle; border-radius: 50%;"></span></th>
                                     </tr>
                                 </thead>
                                 <tbody>
