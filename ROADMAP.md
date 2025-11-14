@@ -241,16 +241,19 @@ feature/* → develop → staging → main → production
 - [ ] Dependency updates (Renovate)
 
 #### 1.3 Улучшение мониторинга
-- [ ] Uptime monitoring (BetterUptime)
-- [ ] API health checks каждые 5 мин
+- [x] API health checks каждые 5 мин ✅ v1.13.1
+  - [x] GitHub Actions workflow для проверки API
+  - [x] Автоматическое создание issues при сбоях
+  - [x] Проверка response time
+- [ ] Uptime monitoring (BetterUptime) - опционально
 - [ ] Performance monitoring (Web Vitals)
 - [ ] Custom alerts в Sentry
 
-#### 1.4 Документация
+#### 1.4 Документация ✅ ЗАВЕРШЕНО
 - [x] TROUBLESHOOTING.md ✅ (создан ранее)
 - [x] API.md с описанием endpoints ✅ v1.13.0
-- [ ] DEPLOYMENT_GUIDE.md
-- [ ] TESTING_GUIDE.md
+- [x] DEPLOYMENT_GUIDE.md ✅ v1.13.1
+- [x] TESTING_GUIDE.md ✅ v1.13.1
 
 ---
 
