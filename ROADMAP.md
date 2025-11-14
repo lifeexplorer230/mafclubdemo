@@ -94,7 +94,7 @@ vercel ls --token $VERCEL_TOKEN
 Инфраструктура: [████████████████████] 100% ✅
 Безопасность:   [████████████████████] 100% ✅
 Архитектура:    [████████████████████] 100% ✅
-Оптимизация:    [██████░░░░░░░░░░░░░░] 30%
+Оптимизация:    [██████████████████░░] 90% ✅
 Тестирование:   [████████████████████] 100% ✅
 Автоматизация:  [░░░░░░░░░░░░░░░░░░░░] 0%
 ```
@@ -309,10 +309,22 @@ feature/* → develop → staging → main → production
   - [x] Offline fallback
   - [x] Автоматическое обновление (sw-register.js)
   - [x] Cache statistics и мониторинг
-- [ ] Code splitting
-- [ ] Lazy loading компонентов
+- [x] Code splitting ✅ v1.14.0
+  - [x] Dynamic module loading (shared/lazy-loader.js)
+  - [x] lazyLoad, loadOnHover, loadOnVisible, loadOnIdle
+  - [x] Module caching и performance tracking
+  - [x] Comprehensive documentation (docs/CODE_SPLITTING.md)
+- [x] Lazy loading компонентов ✅ v1.14.0
+  - [x] Route-based splitting
+  - [x] Component-based splitting
+  - [x] Interaction-based loading
+  - [x] Idle loading strategies
+- [x] Bundle size analysis ✅ v1.14.0
+  - [x] Bundle analyzer (scripts/analyze-bundle.js)
+  - [x] Large file detection (> 50KB)
+  - [x] Code quality checks
+  - [x] Optimization recommendations
 - [ ] Image optimization
-- [ ] Bundle size analysis
 
 #### 2.3 Backend оптимизация
 - [x] Rate limiting ✅ v1.14.3
@@ -322,8 +334,15 @@ feature/* → develop → staging → main → production
   - [x] 429 Too Many Requests response
   - [x] X-RateLimit headers
   - [x] Admin stats и monitoring
+- [x] Compression (gzip/brotli) ✅ v1.14.0
+  - [x] Response compression middleware (shared/compression.js)
+  - [x] Brotli и gzip support
+  - [x] Content-Type detection
+  - [x] Minimum size threshold (1KB)
+  - [x] Compression statistics
+  - [x] Auto-compress middleware
+  - [x] Comprehensive documentation (docs/COMPRESSION.md)
 - [ ] Request caching
-- [ ] Compression (gzip/brotli)
 - [ ] CDN для статики
 
 ---
@@ -573,6 +592,42 @@ curl -I https://mafclubscore.vercel.app/api/rating \
 ---
 
 ## CHANGELOG
+
+
+### v1.14.0 (2025-11-14)
+**Тип**: Minor
+**Изменения**: docs: Update Phase 2.2 and 2.3 completion status with v1.14.0 features
+
+
+
+### v1.13.6 (2025-11-14)
+**Тип**: Patch
+**Изменения**: docs: Update Phase 2.2 and 2.3 completion status with v1.14.0 features
+
+
+
+### v1.14.0 (2025-11-14)
+**Тип**: Minor
+**Изменения**: feat: Add code splitting, bundle optimization, and response compression (Phase 2.2 & 2.3)
+
+**Новые функции:**
+- Code splitting и lazy loading (shared/lazy-loader.js)
+  - Dynamic module loading с кэшированием
+  - loadOnHover, loadOnVisible, loadOnIdle стратегии
+  - Performance tracking и статистика
+- Bundle size analyzer (scripts/analyze-bundle.js)
+  - Обнаружение больших файлов и проблем
+  - Рекомендации по оптимизации
+  - Группировка по директориям
+- Response compression (shared/compression.js)
+  - Brotli и gzip поддержка
+  - Автоматическое определение Content-Type
+  - Compression middleware для Vercel
+
+**Документация:**
+- docs/CODE_SPLITTING.md - полное руководство по code splitting
+- docs/COMPRESSION.md - руководство по compression middleware
+
 
 
 ### v1.13.5 (2025-11-14)
