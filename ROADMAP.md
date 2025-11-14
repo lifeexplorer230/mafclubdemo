@@ -525,6 +525,12 @@ curl -I https://mafclubscore.vercel.app/api/rating \
 ## CHANGELOG
 
 
+### v1.13.1 (2025-11-14)
+**Тип**: Patch
+**Изменения**: Merge branch 'feature/monitoring-setup'
+
+
+
 ### v1.13.0 (2025-11-14)
 **Тип**: Minor
 **Изменения**: feat: Add pre-commit hooks with husky and lint-staged
