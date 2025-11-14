@@ -20,6 +20,9 @@ export function createElement(tag, attributes = {}, children = []) {
   for (const [key, value] of Object.entries(attributes)) {
     if (key === 'className') {
       element.className = value;
+    } else if (key === 'textContent') {
+      // textContent должен быть свойством, а не атрибутом
+      element.textContent = value;
     } else if (key === 'style' && typeof value === 'object') {
       Object.assign(element.style, value);
     } else if (key.startsWith('on') && typeof value === 'function') {

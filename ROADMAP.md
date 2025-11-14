@@ -432,6 +432,12 @@ curl -I https://mafclubscore.vercel.app/api/rating \
 
 ## CHANGELOG
 
+
+### v1.7.2 (2025-11-14)
+**Тип**: Patch
+**Изменения**: fix: Handle textContent as property in createElement() (Phase 0.1)
+
+
 ### v1.7.1 (2025-11-14)
 **Тип**: Patch
 **Изменения**: fix: Move middleware and validators to shared/ to fix Vercel function limit
